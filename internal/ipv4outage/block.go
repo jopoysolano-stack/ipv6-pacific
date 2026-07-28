@@ -27,7 +27,7 @@ var probeExemptPaths = map[string]struct{}{
 	"/api/healthz": {},
 }
 
-// IsCrawlerExemptPath skips 566 for SEO/crawler assets.
+// IsCrawlerExemptPath skips the IPv4-unavailability signal for SEO/crawler assets.
 func IsCrawlerExemptPath(path string) bool {
 	if path == "" {
 		path = "/"
@@ -36,7 +36,7 @@ func IsCrawlerExemptPath(path string) bool {
 	return ok
 }
 
-// IsEmbedExemptPath skips 566 for third-party embed assets on the main host.
+// IsEmbedExemptPath skips the IPv4-unavailability signal for third-party embed assets on the main host.
 func IsEmbedExemptPath(path string) bool {
 	if path == "" {
 		path = "/"
@@ -45,7 +45,7 @@ func IsEmbedExemptPath(path string) bool {
 	return ok
 }
 
-// IsProbeExemptPath skips 566 for connection probe endpoints on the main host.
+// IsProbeExemptPath skips the IPv4-unavailability signal for connection probe endpoints on the main host.
 func IsProbeExemptPath(path string) bool {
 	if path == "" {
 		path = "/"
@@ -79,7 +79,7 @@ func allowedMethod(method string) bool {
 	}
 }
 
-// ShouldBlock reports whether to return 566 instead of invoking the next handler.
+// ShouldBlock reports whether to return 503 + Retry-Over-IPv6 instead of invoking the next handler.
 func ShouldBlock(r *http.Request, cfg Config, now time.Time) bool {
 	if r == nil || !OutageActive(cfg, now) {
 		return false

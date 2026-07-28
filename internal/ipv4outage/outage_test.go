@@ -159,15 +159,15 @@ func TestShouldBlock_skipAndForce(t *testing.T) {
 	}
 }
 
-func TestServe566_headersAndHTML(t *testing.T) {
-	tmpl := template.Must(template.New("566.html").Parse(`<p>until {{.ResumePlain}}</p>`))
+func TestServeUnavailable_headersAndHTML(t *testing.T) {
+	tmpl := template.Must(template.New("ipv4-unavailable.html").Parse(`{{if .IPv6OnlySite}}<a href="{{.IPv6OnlySite}}">v6</a>{{end}}<p>until {{.ResumePlain}}</p>`))
 	now := time.Date(2026, 6, 6, 10, 0, 0, 0, time.UTC)
 	until := UnavailableUntil(now)
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	req.Header.Set("Accept", "text/html")
 	rec := httptest.NewRecorder()
-		Serve566(rec, req, tmpl, until, "tok123", nil)
-	if rec.Code != 566 {
+	ServeUnavailable(rec, req, tmpl, until, "tok123", "https://ipv6.pacific.ipv6forum.com/", nil)
+	if rec.Code != http.StatusServiceUnavailable {
 		t.Fatalf("status=%d", rec.Code)
 	}
 	if rec.Header().Get("Retry-Over-IPv6") != "?1" {
@@ -176,30 +176,45 @@ func TestServe566_headersAndHTML(t *testing.T) {
 	if !strings.Contains(rec.Header().Get("Retry-Over-IPv6-Token"), "tok123") {
 		t.Fatal("missing token header")
 	}
-	if !strings.Contains(rec.Body.String(), "until") {
+	body := rec.Body.String()
+	if !strings.Contains(body, "until") {
 		t.Fatal("expected html body")
+	}
+	if !strings.Contains(body, `href="https://ipv6.pacific.ipv6forum.com/"`) {
+		t.Fatalf("expected ipv6-only link, body=%s", body)
 	}
 }
 
-func TestServe566_problemJSON(t *testing.T) {
+
+func TestServeUnavailable_problemJSON(t *testing.T) {
 	now := time.Date(2026, 6, 6, 10, 0, 0, 0, time.UTC)
 	until := UnavailableUntil(now)
 	req := httptest.NewRequest(http.MethodGet, "/api/index.json", nil)
 	rec := httptest.NewRecorder()
-	Serve566(rec, req, nil, until, "abc", nil)
-	if rec.Code != 566 {
+	ServeUnavailable(rec, req, nil, until, "abc", "https://ipv6.example.com/", nil)
+	if rec.Code != http.StatusServiceUnavailable {
 		t.Fatalf("status=%d", rec.Code)
 	}
 	if ct := rec.Header().Get("Content-Type"); !strings.Contains(ct, "application/problem+json") {
 		t.Fatalf("content-type=%q", ct)
 	}
-	if !strings.Contains(rec.Body.String(), `"retryOverIPv6":true`) {
-		t.Fatalf("body=%s", rec.Body.String())
+	body := rec.Body.String()
+	if !strings.Contains(body, `"type":"urn:ietf:params:problem:ipv4-unavailable"`) {
+		t.Fatalf("body=%s", body)
+	}
+	if !strings.Contains(body, `"status":503`) {
+		t.Fatalf("body=%s", body)
+	}
+	if !strings.Contains(body, `"ipv6OnlySite":"https://ipv6.example.com/"`) {
+		t.Fatalf("body=%s", body)
+	}
+	if strings.Contains(body, "retryOverIPv6") {
+		t.Fatalf("unexpected retryOverIPv6 in body=%s", body)
 	}
 }
 
 func TestMiddleware_blocksIPv4(t *testing.T) {
-	tmpl := template.Must(template.New("566.html").Parse("blocked"))
+	tmpl := template.Must(template.New("ipv4-unavailable.html").Parse("blocked"))
 	cfg := Config{OutageHost: "pacific.ipv6forum.com", Force: true}
 	now := func() time.Time { return time.Date(2026, 6, 5, 0, 0, 0, 0, time.UTC) }
 	var hit bool
@@ -216,7 +231,7 @@ func TestMiddleware_blocksIPv4(t *testing.T) {
 	if hit {
 		t.Fatal("next should not run")
 	}
-	if rec.Code != 566 {
+	if rec.Code != http.StatusServiceUnavailable {
 		t.Fatalf("status=%d", rec.Code)
 	}
 }
@@ -226,5 +241,16 @@ func TestPrefersProblemJSON_accept(t *testing.T) {
 	req.Header.Set("Accept", "application/problem+json")
 	if !PrefersProblemJSON(req) {
 		t.Fatal("should prefer problem+json")
+	}
+}
+
+func TestIPv6OnlySiteFromProbeV6(t *testing.T) {
+	got := ipv6OnlySiteFromProbeV6("https://ipv6.pacific.ipv6forum.com/api/healthz", "pacific.ipv6forum.com")
+	if got != "https://ipv6.pacific.ipv6forum.com/" {
+		t.Fatalf("got %q", got)
+	}
+	got = ipv6OnlySiteFromProbeV6("", "pacific.ipv6forum.com")
+	if got != "https://ipv6.pacific.ipv6forum.com/" {
+		t.Fatalf("default got %q", got)
 	}
 }

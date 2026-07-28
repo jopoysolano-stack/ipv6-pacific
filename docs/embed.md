@@ -59,7 +59,7 @@ Keep **`HEALTHZ_CORS_ALLOW_ORIGIN`** unset (default **`*`**) or remove **`HEALTH
 
 ## Monthly 6/6 IPv4 drill
 
-On UTC day 6, IPv4 clients on the main dual-stack hostname receive HTTP **566** for most paths. These paths stay available for third-party embeds:
+On UTC day 6, IPv4 clients on the main dual-stack hostname receive HTTP **503** with **`Retry-Over-IPv6: ?1`** for most paths. These paths stay available for third-party embeds:
 
 | Path | Purpose |
 |------|---------|
@@ -69,9 +69,9 @@ On UTC day 6, IPv4 clients on the main dual-stack hostname receive HTTP **566** 
 | `/static/css/conn-status-embed.css` | script-tag stylesheet |
 | `/api/healthz` | dual-stack probe (`PROBE_DS_URL` on the main host) |
 
-The iframe page inlines all CSS/JS (no `/static/js` follow-up requests). **`/embed`** (instructions landing) is **not** exempt — IPv4 visitors may see 566 there during the drill.
+The iframe page inlines all CSS/JS (no `/static/js` follow-up requests). **`/embed`** (instructions landing) is **not** exempt — IPv4 visitors may see the IPv4-unavailable page there during the drill.
 
-The **566 error page** itself includes an inlined connection-status button so IPv4 users can see **“IPv4 only”** during the drill.
+The **IPv4-unavailable page** itself includes an inlined connection-status button so IPv4 users can see **“IPv4 only”** during the drill.
 
 ## Privacy
 

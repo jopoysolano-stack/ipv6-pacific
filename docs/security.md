@@ -32,14 +32,14 @@ The site may show **the visitor’s address as seen by the server** (header cont
 Third-party sites can embed the connection-status control via **`GET /embed/conn-status`** (iframe) or **`GET /embed/conn-status.js`** (script tag). Probe URLs are baked into the script at server startup — embedders cannot retarget probes.
 
 - Cross-site embed requires **`Access-Control-Allow-Origin: *`** on **`GET /api/healthz`** for **ipv4**, **ipv6**, and **dual-stack** probe hostnames (default). Setting **`HEALTHZ_CORS_RESTRICT=1`** disables the fallback and breaks embed on arbitrary sites.
-- During the **6/6 IPv4 drill**, embed asset paths are exempt from 566 (see [embed.md](embed.md)); the **566 HTML page** includes an inlined widget (not a public route).
+- During the **6/6 IPv4 drill**, embed asset paths are exempt from the IPv4-unavailability signal (see [embed.md](embed.md)); the **IPv4-unavailable HTML page** includes an inlined widget (not a public route).
 - Full operator guide: [embed.md](embed.md).
 
-## Monthly IPv4 outage (566)
+## Monthly IPv4 outage (503 + Retry-Over-IPv6)
 
 The **6/6 IPv4 drill** (`internal/ipv4outage`) classifies clients using the same **`X-Forwarded-For`** (first hop) / **`RemoteIP`** rules as the connection UI. **Only trust this policy when nginx is the sole component setting `X-Forwarded-For`** toward `pacific-web` — do not forward client-supplied XFF from the Internet.
 
-566 responses include **`Cache-Control: private, no-store`**, **`X-Content-Type-Options: nosniff`**, and the draft retry headers. **`Retry-Over-IPv6-Token`** values are logged for metrics, not used for authentication. **`566.html` is not registered as a public route** (rendered only by middleware).
+IPv4-unavailability responses (`503` with **`Retry-Over-IPv6: ?1`**) include **`Cache-Control: private, no-store`**, **`X-Content-Type-Options: nosniff`**, and the draft retry headers. **`Retry-Over-IPv6-Token`** values are logged for metrics, not used for authentication. **`ipv4-unavailable.html` is not registered as a public route** (rendered only by middleware).
 
 See **`docs/development.md`** (Monthly 6/6 IPv4 outage) for ops variables and testing.
 

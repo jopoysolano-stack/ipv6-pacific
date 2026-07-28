@@ -11,9 +11,10 @@ const defaultOutageHost = "pacific.ipv6forum.com"
 
 // Config holds IPv4 outage policy from the environment.
 type Config struct {
-	OutageHost string
-	Skip       bool
-	Force      bool
+	OutageHost   string
+	IPv6OnlySite string
+	Skip         bool
+	Force        bool
 }
 
 // LoadConfig reads IPV4_OUTAGE_* and PUBLIC_SITE_URL.
@@ -30,7 +31,28 @@ func LoadConfig() Config {
 			cfg.OutageHost = defaultOutageHost
 		}
 	}
+	cfg.IPv6OnlySite = ipv6OnlySiteFromProbeV6(os.Getenv("PROBE_V6_URL"), cfg.OutageHost)
 	return cfg
+}
+
+func ipv6OnlySiteFromProbeV6(probeV6, outageHost string) string {
+	raw := strings.TrimSpace(probeV6)
+	if raw == "" {
+		raw = "https://ipv6." + outageHost + "/api/healthz"
+	}
+	u, err := url.Parse(raw)
+	if err != nil || u.Host == "" {
+		return ""
+	}
+	scheme := u.Scheme
+	if scheme == "" {
+		scheme = "https"
+	}
+	host := stripPort(u.Host)
+	if host == "" {
+		return ""
+	}
+	return scheme + "://" + host + "/"
 }
 
 func hostFromPublicSiteURL(raw string) string {
@@ -48,6 +70,6 @@ func hostFromPublicSiteURL(raw string) string {
 // WarnForceInProduction logs if IPV4_OUTAGE_FORCE is enabled.
 func WarnForceInProduction(cfg Config) {
 	if cfg.Force {
-		log.Print("ipv4_outage: WARNING IPV4_OUTAGE_FORCE=1 — IPv4 clients may receive 566 on the main site outside the monthly schedule")
+		log.Print("ipv4_outage: WARNING IPV4_OUTAGE_FORCE=1 — IPv4 clients may receive 503 + Retry-Over-IPv6 on the main site outside the monthly schedule")
 	}
 }

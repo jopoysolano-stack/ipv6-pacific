@@ -12,7 +12,7 @@
   var ds = typeof window.__PROBE_DS__ === 'string' ? window.__PROBE_DS__ : '';
 
   function tryOutageRecovery(state) {
-    if (variant !== 'outage566') return;
+    if (variant !== 'outage') return;
     var token = root.getAttribute('data-outage-token');
     if (!token || !state || !state.ipv6) return;
     fetch(window.location.pathname + window.location.search, {

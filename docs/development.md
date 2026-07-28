@@ -162,23 +162,23 @@ Same-origin **`GET /api/healthz`** also drives the header when v4/v6 cross-origi
 
 For **privacy and trust** assumptions when showing addresses in the UI, see **`docs/security.md`** (Client IP in UI).
 
-**Embed widget:** third-party sites can embed the connection-status control. See **[embed.md](embed.md)** for iframe/script snippets, nginx, and 566 drill exemptions.
+**Embed widget:** third-party sites can embed the connection-status control. See **[embed.md](embed.md)** for iframe/script snippets, nginx, and IPv4 drill exemptions.
 
 ## Monthly 6/6 IPv4 outage
 
-On **UTC calendar day 6** of each month (00:00:00–23:59:59 UTC), the **main dual-stack hostname** (`pacific.ipv6forum.com`, or the host from **`PUBLIC_SITE_URL`** / **`IPV4_OUTAGE_HOST`**) returns HTTP **566 (IPv4 Unavailable)** to **IPv4** clients for idempotent requests (`GET`, `HEAD`, `OPTIONS`). IPv6 clients receive normal responses. Signaling follows [draft-martin-retry-over-ipv6](https://github.com/franckhlmartin/ietf-draft-retry-over-ipv6/blob/main/draft-martin-retry-over-ipv6.md) (`Retry-Over-IPv6`, `IPv4-Unavailable-Until`, optional `Retry-Over-IPv6-Token`, and RFC 9457 JSON for `/api/*`).
+On **UTC calendar day 6** of each month (00:00:00–23:59:59 UTC), the **main dual-stack hostname** (`pacific.ipv6forum.com`, or the host from **`PUBLIC_SITE_URL`** / **`IPV4_OUTAGE_HOST`**) returns HTTP **503 Service Unavailable** with **`Retry-Over-IPv6: ?1`** to **IPv4** clients for idempotent requests (`GET`, `HEAD`, `OPTIONS`). IPv6 clients receive normal responses. Signaling follows [draft-martin-retry-over-ipv6](https://github.com/franckhlmartin/ietf-draft-retry-over-ipv6/blob/main/draft-martin-retry-over-ipv6.md) (`Retry-Over-IPv6`, `IPv4-Unavailable-Until`, optional `Retry-Over-IPv6-Token`, and RFC 9457 Problem Details with `urn:ietf:params:problem:ipv4-unavailable` for `/api/*`).
 
-Implementation: **`internal/ipv4outage`** middleware in **`cmd/web/main.go`** (runs before the mux). IPv4 users see HTML from **`cmd/web/templates/566.html`** on the **same URL** (not a redirect). Probe vhosts (`ipv4.pacific…`, `ipv6.pacific…`) are **not** affected.
+Implementation: **`internal/ipv4outage`** middleware in **`cmd/web/main.go`** (runs before the mux). IPv4 users see HTML from **`cmd/web/templates/ipv4-unavailable.html`** on the **same URL** (not a redirect), including a human-readable link to the IPv6-only site derived from **`PROBE_V6_URL`** (default `https://ipv6.<host>/`). Probe vhosts (`ipv4.pacific…`, `ipv6.pacific…`) are **not** affected.
 
 | Variable | Purpose |
 |----------|---------|
-| **`IPV4_OUTAGE_SKIP=1`** | Emergency rollback (no 566 for the month) |
-| **`IPV4_OUTAGE_FORCE=1`** | Test 566 outside day 6 (remove in production) |
+| **`IPV4_OUTAGE_SKIP=1`** | Emergency rollback (no IPv4-unavailability signal for the month) |
+| **`IPV4_OUTAGE_FORCE=1`** | Test 503 + Retry-Over-IPv6 outside day 6 (remove in production) |
 | **`IPV4_OUTAGE_HOST`** | Override hostname when **`PUBLIC_SITE_URL`** is unset |
 
 **Crawler exemptions** (still HTTP 200 on IPv4 during the drill): `/robots.txt`, `/sitemap.xml`, `/og/map.png`.
 
-**Embed exemptions** (third-party widgets keep working on IPv4 during the drill): `/embed/conn-status`, `/embed/conn-status/details`, `/embed/conn-status.js`, `/static/css/conn-status-embed.css`, and **`/api/healthz`** on the main host (dual-stack **`PROBE_DS_URL`**). The iframe document inlines CSS/JS (no `/static/js` follow-ups). **`/embed`** (instructions page) is not exempt. The **566 HTML page** includes an inlined connection-status button. See **[embed.md](embed.md)**.
+**Embed exemptions** (third-party widgets keep working on IPv4 during the drill): `/embed/conn-status`, `/embed/conn-status/details`, `/embed/conn-status.js`, `/static/css/conn-status-embed.css`, and **`/api/healthz`** on the main host (dual-stack **`PROBE_DS_URL`**). The iframe document inlines CSS/JS (no `/static/js` follow-ups). **`/embed`** (instructions page) is not exempt. The **IPv4-unavailable HTML page** includes an inlined connection-status button. See **[embed.md](embed.md)**.
 
 **Advance notice:** the **7 calendar days** before each UTC day **6** show an optional banner on all main HTML pages (home, about, country, embed). Permanent copy: `/about#ipv6-day-drill`.
 
@@ -198,7 +198,7 @@ curl -sk -H 'Host: pacific.ipv6forum.com' -H 'X-Forwarded-For: 2001:db8::1' http
 ./scripts/ipv4_outage_report.sh --date 2026-06-06 --geo   # optional country lookup via ip-api.com (~1h)
 ```
 
-The report merges **journald** (`ipv4_outage` JSON lines from `ipv6-pacific-web`) and **nginx** access logs. Primary tables exclude **exempt paths** still reachable on IPv4 during the drill (`/api/healthz`, embed assets, crawler paths). It prints counts and **percentages** by connection stack (IPv4 vs IPv6) and a merged User-Agent family table (total, IPv4/IPv6 split, ×566 rate, unique IPs per stack). Requires `python3`, read access to `/var/log/nginx/`, and `journalctl` (often via `sudo`).
+The report merges **journald** (`ipv4_outage` JSON lines from `ipv6-pacific-web`) and **nginx** access logs. Primary tables exclude **exempt paths** still reachable on IPv4 during the drill (`/api/healthz`, embed assets, crawler paths). It prints counts and **percentages** by connection stack (IPv4 vs IPv6) and a merged User-Agent family table (total, IPv4/IPv6 split, ×signal rate, unique IPs per stack). Requires `python3`, read access to `/var/log/nginx/`, and `journalctl` (often via `sudo`).
 
 Local smoke test with fixtures:
 
@@ -208,15 +208,15 @@ Local smoke test with fixtures:
   --nginx-log scripts/fixtures/ipv4_outage_nginx.log
 ```
 
-**App log shape** (since vNext, one JSON object per line after the `ipv4_outage` prefix):
+**App log shape** (one JSON object per line after the `ipv4_outage` prefix):
 
 ```json
-{"event":"566","token":"…","path":"/","client_ip":"1.2.3.4","client_family":"ipv4","user_agent":"Mozilla/5.0…","host":"pacific.ipv6forum.com"}
+{"event":"ipv4_unavailable","token":"…","path":"/","client_ip":"1.2.3.4","client_family":"ipv4","user_agent":"Mozilla/5.0…","host":"pacific.ipv6forum.com"}
 {"event":"probe","path":"/api/healthz","client_ip":"2001:db8::1","client_family":"ipv6","family":"ipv6","referer":"https://pacific…/"}
 {"event":"recovery","token":"…","client_ip":"2001:db8::1","client_family":"ipv6","user_agent":"…","host":"pacific.ipv6forum.com"}
 ```
 
-The **566 page** sends `Retry-Over-IPv6-Recovery` when the IPv6 probe succeeds (`data-outage-token` on the conn-status widget). Recovery token match rate appears in the report summary.
+The **IPv4-unavailable page** sends `Retry-Over-IPv6-Recovery` when the IPv6 probe succeeds (`data-outage-token` on the conn-status widget). Recovery token match rate appears in the report summary.
 
 **Production rollout:** deploy `pacific-web`, set **`PUBLIC_SITE_URL`**, confirm **`IPV4_OUTAGE_FORCE`** is unset, restart **`ipv6-pacific-web`**. Announce the drill externally before the first event.
 

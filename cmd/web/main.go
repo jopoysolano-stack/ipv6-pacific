@@ -64,7 +64,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tmpl566, err := template.New("566.html").ParseFS(templateFS, "templates/566.html", "templates/partials/conn-status.html")
+	tmplUnavailable, err := template.New("ipv4-unavailable.html").ParseFS(templateFS, "templates/ipv4-unavailable.html", "templates/partials/conn-status.html")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -75,7 +75,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("conn-status embed bundle: %v", err)
 	}
-	enrich566 := enrich566Page(connBundle, publicSiteURL)
+	enrichOutage := enrichOutagePage(connBundle, publicSiteURL)
 
 	outageCfg := ipv4outage.LoadConfig()
 	ipv4outage.WarnForceInProduction(outageCfg)
@@ -156,7 +156,7 @@ func main() {
 		mux.ServeHTTP(w, r)
 	})
 	handler := httpserver.SecurityHeaders(probeConnect,
-		ipv4outage.Middleware(outageCfg, tmpl566, enrich566, nil, app))
+		ipv4outage.Middleware(outageCfg, tmplUnavailable, enrichOutage, nil, app))
 
 	certFile := tlsCertPath(root, getenv("TLS_CERT_FILE", "certs/cert.pem"))
 	keyFile := tlsCertPath(root, getenv("TLS_KEY_FILE", "certs/key.pem"))

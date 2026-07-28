@@ -33,7 +33,7 @@
       showEmbedCTA: false,
       showAttribution: true,
     },
-    outage566: {
+    outage: {
       title: 'Your connection',
       subtitle: 'You are viewing this page over IPv4 during our monthly IPv6 drill.',
       showEmbedCTA: false,

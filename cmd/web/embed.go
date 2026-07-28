@@ -11,16 +11,16 @@ import (
 	"github.com/pacific-monitor/pacific-monitor/internal/siteurl"
 )
 
-func enrich566Page(bundle *connStatusBundle, publicSiteURL string) ipv4outage.Page566Enricher {
+func enrichOutagePage(bundle *connStatusBundle, publicSiteURL string) ipv4outage.PageEnricher {
 	siteURL := strings.TrimRight(strings.TrimSpace(publicSiteURL), "/")
 	if siteURL == "" {
 		siteURL = "https://pacific.ipv6forum.com"
 	}
-	return func(r *http.Request, data *ipv4outage.Page566Data) {
+	return func(r *http.Request, data *ipv4outage.PageData) {
 		data.Nonce = httpserver.CSPNonce(r)
 		data.InlineCSS = template.CSS(bundle.css)
 		data.InlineJS = template.JS(bundle.inlineJS)
-		data.ConnStatusVariant = "outage566"
+		data.ConnStatusVariant = "outage"
 		data.SiteURL = siteURL
 	}
 }

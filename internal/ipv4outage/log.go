@@ -48,11 +48,11 @@ func clientFields(r *http.Request) (ip, family, ua string) {
 	return ip, family, truncateUA(r.UserAgent())
 }
 
-// Log566 records a 566 response for operations metrics.
-func Log566(r *http.Request, token string) {
+// LogSignal records a 503 + Retry-Over-IPv6 response for operations metrics.
+func LogSignal(r *http.Request, token string) {
 	ip, family, ua := clientFields(r)
 	writeLog(logRecord{
-		Event:        "566",
+		Event:        "ipv4_unavailable",
 		Token:        token,
 		Path:         safePath(r),
 		ClientIP:     ip,

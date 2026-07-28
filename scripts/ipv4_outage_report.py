@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Post-drill report for the monthly IPv4 outage (HTTP 566).
+Post-drill report for the monthly IPv4 outage (HTTP 503 + Retry-Over-IPv6).
 
 Reads journald ipv4_outage lines and nginx access logs, prints counts and
 percentages by connection stack and User-Agent family.
@@ -74,7 +74,7 @@ EXEMPT_PATHS = frozenset(
 )
 
 JOURNAL_RE = re.compile(
-    r"ipv4_outage event=(?P<event>566|recovery)\s+"
+    r"ipv4_outage event=(?P<event>ipv4_unavailable|566|recovery)\s+"
     r"token=(?P<token>\S+)\s+"
     r"path=(?P<path>\S+)\s+"
     r"client_ip=(?P<client_ip>\S+)\s+"
@@ -83,6 +83,11 @@ JOURNAL_RE = re.compile(
 
 # JSON log lines (future / mixed deployments)
 JOURNAL_JSON_RE = re.compile(r"ipv4_outage\s+(\{.*\})")
+
+# App journal signal events (draft-04 + legacy 566).
+SIGNAL_EVENTS = frozenset({"ipv4_unavailable", "566"})
+# Nginx access logs lack Retry-Over-IPv6; on drill day treat 503 (and legacy 566) as signal.
+SIGNAL_STATUSES = frozenset({503, 566})
 
 NGINX_STATUS_RE = re.compile(r'"[A-Z]+ [^"]*"\s+(\d+)\s+')
 NGINX_DATE_RE = re.compile(r"\[(\d{2}/\w{3}/\d{4}):")
@@ -227,7 +232,7 @@ def parse_journal_line(line: str) -> Optional[JournalEvent]:
         try:
             obj = json.loads(jm.group(1))
             ev = str(obj.get("event", ""))
-            if ev in ("566", "recovery", "probe"):
+            if ev in ("ipv4_unavailable", "566", "recovery", "probe"):
                 return JournalEvent(
                     event=ev,
                     token=str(obj.get("token", "")),
@@ -425,12 +430,12 @@ def render_report(
     lines.append(f"Generated: {now}  Host: {host}")
     lines.append("")
 
-    ev566 = [e for e in journal if e.event == "566"]
+    ev_signal = [e for e in journal if e.event in SIGNAL_EVENTS]
     ev_recovery = [e for e in journal if e.event == "recovery"]
-    tokens_566 = {e.token for e in ev566}
+    tokens_signal = {e.token for e in ev_signal}
     tokens_recovery = {e.token for e in ev_recovery}
-    matched = tokens_566 & tokens_recovery
-    unique_blocked_ips = {e.client_ip for e in ev566}
+    matched = tokens_signal & tokens_recovery
+    unique_blocked_ips = {e.client_ip for e in ev_signal}
 
     main_rows = [r for r in nginx_rows if r.vhost == main_host]
     exempt_main = [r for r in main_rows if is_exempt_path(r.path)]
@@ -439,19 +444,19 @@ def render_report(
     else:
         main_primary = [r for r in main_rows if not is_exempt_path(r.path)]
 
-    main_566 = [r for r in main_primary if r.status == 566]
-    total_main_566 = len(main_566)
+    main_signal = [r for r in main_primary if r.status in SIGNAL_STATUSES]
+    total_main_signal = len(main_signal)
     grand_total_requests = len(main_primary)
 
     lines.append("## Summary")
-    lines.append(f"- 566 events (journald): {len(ev566)}")
+    lines.append(f"- IPv4-unavailable events (journald): {len(ev_signal)}")
     lines.append(f"- Recovery events (journald): {len(ev_recovery)}")
     lines.append(f"- Probe events (journald): {len([e for e in journal if e.event == 'probe'])}")
     lines.append(f"- Matched recovery tokens: {len(matched)}")
-    if tokens_566:
+    if tokens_signal:
         lines.append(
-            f"- Token recovery rate: {pct(len(matched), len(tokens_566))} "
-            f"({len(matched)} / {len(tokens_566)} unique 566 tokens)"
+            f"- Token recovery rate: {pct(len(matched), len(tokens_signal))} "
+            f"({len(matched)} / {len(tokens_signal)} unique signal tokens)"
         )
     lines.append(f"- Unique IPv4 client_ip blocked (journald): {len(unique_blocked_ips)}")
     if not include_exempt:
@@ -459,10 +464,10 @@ def render_report(
             f"- Main-host nginx requests excluded (exempt paths): {len(exempt_main)}"
         )
     lines.append(f"- Main-host nginx requests (blockable paths): {len(main_primary)}")
-    lines.append(f"- Main-host nginx ×566 (blockable paths): {len(main_566)}")
+    lines.append(f"- Main-host nginx ×signal (blockable paths): {len(main_signal)}")
     if main_primary:
         lines.append(
-            f"- Main-host ×566 rate (blockable): {pct(len(main_566), len(main_primary))}"
+            f"- Main-host ×signal rate (blockable): {pct(len(main_signal), len(main_primary))}"
         )
     lines.append("")
 
@@ -472,7 +477,7 @@ def render_report(
         b = stack_stats[r.stack]
         b.requests += 1
         b.ips.add(r.remote_addr)
-        if r.status == 566:
+        if r.status in SIGNAL_STATUSES:
             b.blocked += 1
 
     lines.append("## Impact by connection stack (main host, blockable paths)")
@@ -493,7 +498,7 @@ def render_report(
         )
     lines.append(
         format_table(
-            ["Stack", "Requests", "×566", "%566", "Unique IPs"],
+            ["Stack", "Requests", "×signal", "%signal", "Unique IPs"],
             stack_rows,
         )
     )
@@ -511,7 +516,7 @@ def render_report(
         else:
             b.ipv6_requests += 1
             b.ipv6_ips.add(r.remote_addr)
-        if r.status == 566:
+        if r.status in SIGNAL_STATUSES:
             b.blocked += 1
 
     lines.append("## Impact by client family (main host, blockable paths)")
@@ -538,8 +543,8 @@ def render_report(
                 "Total",
                 "IPv4 reqs",
                 "IPv6 reqs",
-                "×566",
-                "%566",
+                "×signal",
+                "%signal",
                 "Unique IPv4",
                 "Unique IPv6",
             ],
@@ -555,27 +560,27 @@ def render_report(
         for r in exempt_main:
             p = normalize_path(r.path)
             t, b = by_path[p]
-            by_path[p] = (t + 1, b + (1 if r.status == 566 else 0))
+            by_path[p] = (t + 1, b + (1 if r.status in SIGNAL_STATUSES else 0))
         ex_rows = [
             [p, str(t), str(b), pct(b, t)]
             for p, (t, b) in sorted(by_path.items(), key=lambda x: -x[1][0])
         ]
-        lines.append(format_table(["Path", "Requests", "×566", "%566"], ex_rows))
+        lines.append(format_table(["Path", "Requests", "×signal", "%signal"], ex_rows))
         lines.append("")
 
     # Journal paths
     path_counts: DefaultDict[str, int] = defaultdict(int)
-    for e in ev566:
+    for e in ev_signal:
         path_counts[e.path] += 1
     lines.append("## Top paths blocked (journald)")
     path_rows = []
     for p, c in sorted(path_counts.items(), key=lambda x: -x[1])[:25]:
-        path_rows.append([p, str(c), pct(c, len(ev566))])
-    lines.append(format_table(["Path", "Events", "% of 566"], path_rows))
+        path_rows.append([p, str(c), pct(c, len(ev_signal))])
+    lines.append(format_table(["Path", "Events", "% of signal"], path_rows))
     lines.append("")
 
     # Hourly — need timestamps from journal; journal -o cat lacks time. Note limitation.
-    lines.append("## Hourly 566 volume (journald)")
+    lines.append("## Hourly IPv4-unavailable volume (nginx)")
     lines.append(
         "(Requires journal timestamps; re-run with `journalctl -o short-iso` piped to "
         "--journal-file for hourly breakdown, or use nginx time field.)"
@@ -584,7 +589,9 @@ def render_report(
     for path in discover_nginx_logs(drill_day):
         marker = nginx_date_marker(drill_day)
         for raw in iter_nginx_lines([path], drill_day):
-            if main_host not in raw or " 566 " not in raw:
+            if main_host not in raw:
+                continue
+            if " 503 " not in raw and " 566 " not in raw:
                 continue
             tm = re.search(r"\[(\d{2})/\w{3}/\d{4}:(\d{2}):", raw)
             if tm:
@@ -637,7 +644,10 @@ def render_report(
     lines.append(
         "- Blockable paths exclude /api/healthz, embed assets, and crawler paths (IPv4 still gets HTTP 200)."
     )
-    lines.append("- %566 = ×566 / total requests for that row (family or stack).")
+    lines.append(
+        "- ×signal counts nginx 503 (draft-04) and legacy 566; access logs cannot see Retry-Over-IPv6."
+    )
+    lines.append("- %signal = ×signal / total requests for that row (family or stack).")
     lines.append("- IPv4/IPv6 req columns show share of that family's requests per connection stack.")
     lines.append("- Dual-stack users appear in IPv4 and/or IPv6 columns depending on connection chosen.")
     lines.append("- Per-user IPv4→IPv6 recovery needs Retry-Over-IPv6-Recovery tokens in app logs.")
@@ -703,7 +713,7 @@ def main() -> int:
     geo_counts: Optional[dict[str, int]] = None
     geo_total = 0
     if args.geo:
-        blocked_ips = {e.client_ip for e in journal if e.event == "566"}
+        blocked_ips = {e.client_ip for e in journal if e.event in SIGNAL_EVENTS}
         cache: dict[str, str] = {}
         if args.geo_cache and args.geo_cache.is_file():
             for line in args.geo_cache.read_text().splitlines():

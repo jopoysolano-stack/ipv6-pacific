@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func TestLog566_emitsJSON(t *testing.T) {
+func TestLogSignal_emitsJSON(t *testing.T) {
 	orig := log.Writer()
 	defer log.SetOutput(orig)
 	var buf strings.Builder
@@ -20,7 +20,7 @@ func TestLog566_emitsJSON(t *testing.T) {
 	req.Host = "pacific.ipv6forum.com"
 	req.Header.Set("X-Forwarded-For", "203.0.113.1")
 	req.Header.Set("User-Agent", "Mozilla/5.0 TestBrowser")
-	Log566(req, "tok123")
+	LogSignal(req, "tok123")
 
 	line := strings.TrimSpace(buf.String())
 	idx := strings.Index(line, "ipv4_outage ")
@@ -32,7 +32,7 @@ func TestLog566_emitsJSON(t *testing.T) {
 	if err := json.Unmarshal([]byte(payload), &rec); err != nil {
 		t.Fatal(err)
 	}
-	if rec.Event != "566" || rec.Token != "tok123" || rec.Path != "/country/FJ" {
+	if rec.Event != "ipv4_unavailable" || rec.Token != "tok123" || rec.Path != "/country/FJ" {
 		t.Fatalf("rec=%+v", rec)
 	}
 	if rec.ClientIP != "203.0.113.1" || rec.ClientFamily != "ipv4" {
