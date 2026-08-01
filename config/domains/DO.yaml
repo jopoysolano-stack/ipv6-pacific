@@ -1,0 +1,35 @@
+# Dominican Republic — Spanish government domains (.gob.do / .gov.do).
+domains:
+  - domain: altice.com.do
+    organization: Altice Dominicana
+    sector: Telecommunications
+  - domain: bancentral.gov.do
+    organization: Banco Central de la República Dominicana
+    sector: Government
+  - domain: banreservas.com.do
+    organization: Banco de Reservas de la República Dominicana
+    sector: Government
+  - domain: claro.com.do
+    organization: Claro Dominicana
+    sector: Telecommunications
+  - domain: indotel.gob.do
+    organization: Instituto Dominicano de las Telecomunicaciones (INDOTEL)
+    sector: Government
+  - domain: minerd.gob.do
+    organization: Ministerio de Educación
+    sector: Government
+  - domain: one.gob.do
+    organization: Oficina Nacional de Estadística (ONE)
+    sector: Government
+  - domain: pucmm.edu.do
+    organization: Pontificia Universidad Católica Madre y Maestra
+    sector: Education
+  - domain: salud.gob.do
+    organization: Ministerio de Salud Pública
+    sector: Government
+  - domain: uasd.edu.do
+    organization: Universidad Autónoma de Santo Domingo
+    sector: Education
+  - domain: wind.com.do
+    organization: Wind Telecom (Viva)
+    sector: Telecommunications

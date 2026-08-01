@@ -12,9 +12,9 @@
   {{template "siteBanners" .}}
   <header class="site-header">
     <div class="site-header__lead">
-      <p><a href="/">← Pacific Islands IPv6 Monitor</a></p>
+      <p><a href="/">← {{.SiteName}}</a></p>
       <h1>{{.Name}} ({{.ISO}})</h1>
-      <p class="meta">Pacific Islands IPv6 Monitor</p>
+      <p class="meta">{{.SiteName}}</p>
     </div>
     <div class="site-header__conn">
       {{template "connStatusButton" .}}

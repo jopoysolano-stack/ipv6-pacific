@@ -1,0 +1,38 @@
+# Martinique
+domains:
+  - domain: ac-martinique.fr
+    organization: Académie de Martinique
+    sector: Education
+  - domain: arcep.fr
+    organization: ARCEP
+    sector: Government
+  - domain: digicelantilles.com
+    organization: Digicel Antilles
+    sector: Telecommunications
+  - domain: insee.fr
+    organization: INSEE
+    sector: Government
+  - domain: martinique.gouv.fr
+    organization: Préfecture de la Martinique
+    sector: Government
+  - domain: martinique.org
+    organization: Comité Martiniquais du Tourisme
+    sector: Government
+  - domain: orange.fr
+    organization: Orange Caraïbe
+    sector: Telecommunications
+  - domain: region-martinique.mq
+    organization: Collectivité Territoriale de Martinique
+    sector: Government
+  - domain: sfr.fr
+    organization: SFR Caraïbe
+    sector: Telecommunications
+  - domain: univ-antilles.fr
+    organization: Université des Antilles
+    sector: Education
+  - domain: only.fr
+    organization: Only (telecom / ISP brand in Antilles)
+    sector: Telecommunications
+  - domain: douane.gouv.fr
+    organization: Douanes françaises
+    sector: Government

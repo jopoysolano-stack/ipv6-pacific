@@ -4,7 +4,7 @@ Details for **`config/domains/{ISO2}.yaml`**. Prerequisites and config layout: *
 
 ## 1. Preconditions
 
-- Economy **ISO2** must exist in **`config/pacific_iso2.yaml`** or the collector skips that country file.
+- Economy **ISO2** must exist in the **active region** allowlist (`config/{REGION}_iso2.yaml`) or country routes reject it; the collector skips missing domain files.
 - Filename: **`config/domains/{ISO2}.yaml`** (uppercase ISO2).
 
 ## 2. What to include

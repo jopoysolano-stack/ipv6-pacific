@@ -1,0 +1,38 @@
+# Guadeloupe
+domains:
+  - domain: regionguadeloupe.fr
+    organization: Région Guadeloupe
+    sector: Government
+  - domain: guadeloupe.gouv.fr
+    organization: Préfecture de la Guadeloupe
+    sector: Government
+  - domain: univ-antilles.fr
+    organization: Université des Antilles
+    sector: Education
+  - domain: ac-guadeloupe.fr
+    organization: Académie de Guadeloupe
+    sector: Education
+  - domain: orange.fr
+    organization: Orange Caraïbe
+    sector: Telecommunications
+  - domain: sfr.fr
+    organization: SFR Caraïbe
+    sector: Telecommunications
+  - domain: digicelantilles.com
+    organization: Digicel Antilles françaises
+    sector: Telecommunications
+  - domain: dauphintelecom.com
+    organization: Dauphin Telecom
+    sector: Telecommunications
+  - domain: lesilesdeguadeloupe.com
+    organization: Comité du Tourisme des Îles de Guadeloupe
+    sector: Government
+  - domain: douane.gouv.fr
+    organization: Douanes françaises
+    sector: Government
+  - domain: arcep.fr
+    organization: ARCEP
+    sector: Government
+  - domain: insee.fr
+    organization: INSEE
+    sector: Government

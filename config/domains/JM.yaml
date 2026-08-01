@@ -1,0 +1,51 @@
+# Jamaica — Digicel Group HQ Kingston; UWI Regional Headquarters (Vice-Chancellery) at Mona.
+domains:
+  - domain: boj.org.jm
+    organization: Bank of Jamaica
+    sector: Government
+  - domain: digicel.com
+    organization: Digicel Jamaica
+    sector: Telecommunications
+  - domain: digicelgroup.com
+    organization: Digicel Group
+    sector: Telecommunications
+  - domain: egovja.com
+    organization: eGov Jamaica Limited
+    sector: Government
+  - domain: flowjamaica.com
+    organization: FLOW Jamaica (Columbus Communications)
+    sector: Telecommunications
+  - domain: gov.jm
+    organization: Government of Jamaica
+    sector: Government
+  - domain: japarliament.gov.jm
+    organization: Houses of Parliament of Jamaica
+    sector: Government
+  - domain: jis.gov.jm
+    organization: Jamaica Information Service
+    sector: Government
+  - domain: moh.gov.jm
+    organization: Ministry of Health and Wellness
+    sector: Government
+  - domain: mset.gov.jm
+    organization: Ministry of Science, Energy, Telecommunications and Transport
+    sector: Government
+  - domain: opm.gov.jm
+    organization: Office of the Prime Minister
+    sector: Government
+  - domain: our.org.jm
+    organization: Office of Utilities Regulation
+    sector: Government
+  - domain: sma.gov.jm
+    organization: Spectrum Management Authority
+    sector: Government
+  - domain: utech.edu.jm
+    organization: University of Technology, Jamaica
+    sector: Education
+  - domain: uwi.edu
+    organization: The University of the West Indies (Regional Headquarters)
+    sector: Regional
+    regional: true
+  - domain: uwimona.edu.jm
+    organization: The University of the West Indies, Mona Campus
+    sector: Education

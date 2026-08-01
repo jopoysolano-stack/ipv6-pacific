@@ -37,15 +37,31 @@ func main() {
 		*verbose = true
 	}
 
-	dataDir := getenv("DATA_DIR", filepath.Join(*root, "data"))
+	regionID := config.RegionIDFromEnv()
+	region, err := config.ResolveRegion(*root, regionID)
+	if err != nil {
+		log.Fatalf("region: %v", err)
+	}
+	if err := config.ValidateNoISOOverlap(*root); err != nil {
+		log.Fatalf("region ISO overlap: %v", err)
+	}
+	collector.DefaultRipestatSourceApp = region.RipestatSourceApp
+
+	dataDir := strings.TrimSpace(os.Getenv("DATA_DIR"))
+	if dataDir == "" {
+		dataDir = filepath.Join(*root, config.DefaultDataDir(region.ID))
+	}
 	if err := os.MkdirAll(filepath.Join(dataDir, "countries"), 0o755); err != nil {
 		log.Fatal(err)
 	}
 
-	pacific, err := config.LoadPacific(*root)
+	pacific, err := config.LoadEconomies(*root, region.ID)
 	if err != nil {
-		log.Fatalf("load pacific_iso2: %v", err)
+		log.Fatalf("load economies for REGION=%s: %v", region.ID, err)
 	}
+
+	log.Printf("collector: REGION=%s DATA_DIR=%s economies=%d ripestat_sourceapp=%s",
+		region.ID, dataDir, len(pacific.Countries), region.RipestatSourceApp)
 
 	chk := checksFromEnv()
 	httpClient := &http.Client{Timeout: 30 * time.Second}
@@ -103,7 +119,7 @@ func countrySchedule(countries []config.PacificCountry, firstISO string) ([]conf
 			}
 		}
 		if idx < 0 {
-			return nil, fmt.Errorf("unknown country %q (not in config/pacific_iso2.yaml)", firstISO)
+			return nil, fmt.Errorf("unknown country %q (not in active region economy list)", firstISO)
 		}
 		first := out[idx]
 		out = append(out[:idx], out[idx+1:]...)
@@ -134,7 +150,7 @@ func runOncePass(ctx context.Context, root, dataDir string, pacific *config.Paci
 		}
 		return nil
 	}
-	log.Printf("[collector] run-once: all %d economies from config/pacific_iso2.yaml", len(pacific.Countries))
+	log.Printf("[collector] run-once: all %d economies from active REGION allowlist", len(pacific.Countries))
 	schedule, err := countrySchedule(pacific.Countries, "")
 	if err != nil {
 		return err
@@ -150,7 +166,7 @@ func countryByISO(pacific *config.PacificList, iso string) (config.PacificCountr
 			return c, nil
 		}
 	}
-	return zero, fmt.Errorf("unknown country %q (not in config/pacific_iso2.yaml)", iso)
+	return zero, fmt.Errorf("unknown country %q (not in active region economy list)", iso)
 }
 
 func runPass(ctx context.Context, root, dataDir string, pacific *config.PacificList, schedule []config.PacificCountry, chk checks.Config, hc *http.Client, verbose bool) error {

@@ -5,32 +5,26 @@
     return;
   }
 
-  // Labels from <title> inside each EEZ path in EEZ_Oceania.svg → ISO 3166-1 alpha-2 (monitored economies).
-  var TITLE_TO_ISO = {
-    'American Samoa (US)': 'AS',
-    'Cook Islands (NZ)': 'CK',
-    'Federated States of Micronesia': 'FM',
-    'Fiji': 'FJ',
-    'French Polynesia (Fr)': 'PF',
-    'Kiribati (Gilbert Islands)': 'KI',
-    'Line Islands (Kiribati)': 'KI',
-    Marshalls: 'MH',
-    Nauru: 'NR',
-    'New Caledonia': 'NC',
-    'Niue (NZ)': 'NU',
-    'Northern Marianas (US)': 'MP',
-    'Guam (US)': 'GU',
-    'Papua New Guinea': 'PG',
-    Palau: 'PW',
-    'Phoenix Islands (Kiribati)': 'KI',
-    Samoa: 'WS',
-    'Solomon Islands': 'SB',
-    'Tokelau (NZ)': 'TK',
-    Tonga: 'TO',
-    Tuvalu: 'TV',
-    Vanuatu: 'VU',
-    'Wallis and Futuna (Fr)': 'WF',
-  };
+  var svgURL = root.getAttribute('data-eez-svg') || '';
+  var titleRaw = root.getAttribute('data-title-iso') || '{}';
+  var TITLE_TO_ISO = {};
+  try {
+    TITLE_TO_ISO = JSON.parse(titleRaw) || {};
+  } catch (e) {
+    console.error('eez title map JSON parse failed', e);
+  }
+
+  function territoryLabel(pathEl) {
+    var tEl = pathEl.querySelector('title');
+    if (tEl) {
+      var t = tEl.textContent.replace(/\s+/g, ' ').trim();
+      if (t) {
+        return t;
+      }
+    }
+    var id = (pathEl.getAttribute('id') || '').replace(/\s+/g, ' ').trim();
+    return id || '';
+  }
 
   function buildPreferredByISO(indexPayload) {
     var out = {};
@@ -61,8 +55,13 @@
     console.error('PacificPctColorRamp missing; load pct-color-ramp.js before map-home.js');
   }
 
+  if (!svgURL) {
+    root.textContent = 'EEZ map not configured.';
+    return;
+  }
+
   Promise.all([
-    fetch('/static/img/EEZ_Oceania.svg').then(function (r) {
+    fetch(svgURL).then(function (r) {
       if (!r.ok) {
         throw new Error('fetch failed');
       }
@@ -86,22 +85,24 @@
         throw new Error('invalid svg');
       }
       svg.setAttribute('class', 'eez-map-svg');
-      // Intrinsic doc size from Inkscape; enables uniform scaling in CSS (no stretch).
-      svg.setAttribute('viewBox', '0 0 385 215');
+      if (!svg.getAttribute('viewBox')) {
+        var w = parseFloat(svg.getAttribute('width')) || 385;
+        var h = parseFloat(svg.getAttribute('height')) || 215;
+        svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+      }
       svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
       svg.removeAttribute('width');
       svg.removeAttribute('height');
       svg.setAttribute('role', 'img');
 
-      // Ocean background: source rect used oversized coords and rendered after stray paths.
-      // Snap to viewBox and paint first (after defs) so it fills the visible map.
       var defs = svg.querySelector('defs');
       var ocean = svg.querySelector('#rect5538-5');
-      if (ocean && defs && defs.parentNode === svg) {
-        ocean.setAttribute('x', '0');
-        ocean.setAttribute('y', '0');
-        ocean.setAttribute('width', '385');
-        ocean.setAttribute('height', '215');
+      var vb = (svg.getAttribute('viewBox') || '0 0 385 215').split(/[\s,]+/);
+      if (ocean && defs && defs.parentNode === svg && vb.length >= 4) {
+        ocean.setAttribute('x', vb[0]);
+        ocean.setAttribute('y', vb[1]);
+        ocean.setAttribute('width', vb[2]);
+        ocean.setAttribute('height', vb[3]);
         defs.parentNode.insertBefore(ocean, defs.nextSibling);
       }
 
@@ -112,12 +113,8 @@
 
       for (var j = 0; j < paths.length; j++) {
         var p = paths[j];
-        var tEl = p.querySelector('title');
-        if (!tEl) {
-          continue;
-        }
-        var territoryName = tEl.textContent.replace(/\s+/g, ' ').trim();
-        if (!TITLE_TO_ISO[territoryName]) {
+        var territoryName = territoryLabel(p);
+        if (!territoryName || !TITLE_TO_ISO[territoryName]) {
           p.classList.add('eez-region--outside');
           p.style.setProperty('fill', '#b8bcc4');
           p.style.setProperty('stroke', '#9ca3af');
@@ -132,15 +129,17 @@
 
       for (var i = 0; i < paths.length; i++) {
         var path = paths[i];
-        var titleEl = path.querySelector('title');
-        if (!titleEl) {
-          continue;
-        }
-        var label = titleEl.textContent.replace(/\s+/g, ' ').trim();
-        var iso = TITLE_TO_ISO[label];
+        var label = territoryLabel(path);
+        var iso = label ? TITLE_TO_ISO[label] : '';
         if (!iso) {
           continue;
         }
+        var titleEl = path.querySelector('title');
+        if (!titleEl) {
+          titleEl = document.createElementNS(svgNS, 'title');
+          path.insertBefore(titleEl, path.firstChild);
+        }
+        var baseLabel = label;
         path.classList.add('eez-region--linked');
         path.setAttribute('data-iso2', iso);
         var pct = preferredByISO[iso];
@@ -148,14 +147,15 @@
           path.style.setProperty('fill', ramp.colorForPct(pct));
           path.setAttribute('data-ipv6-preferred-pct', String(pct));
           titleEl.textContent =
-            label + ' — ' + pct.toFixed(2) + '% IPv6 preferred (APNIC Labs estimate)';
+            baseLabel + ' — ' + pct.toFixed(2) + '% IPv6 preferred (APNIC Labs estimate)';
           path.setAttribute(
             'aria-label',
-            label + ' — ' + pct.toFixed(2) + '% IPv6 preferred — open monitoring page'
+            baseLabel + ' — ' + pct.toFixed(2) + '% IPv6 preferred — open monitoring page'
           );
         } else {
           path.style.setProperty('fill', ramp.NO_DATA_GRAY);
-          path.setAttribute('aria-label', label + ' — open monitoring page');
+          titleEl.textContent = baseLabel;
+          path.setAttribute('aria-label', baseLabel + ' — open monitoring page');
         }
         path.style.setProperty('stroke', '#4b5563');
         path.style.setProperty('stroke-width', '0.25');

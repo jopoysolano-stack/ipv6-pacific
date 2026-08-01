@@ -1,0 +1,38 @@
+# U.S. Virgin Islands
+domains:
+  - domain: digicelusvi.com
+    organization: Digicel USVI
+    sector: Telecommunications
+  - domain: doe.vi
+    organization: Department of Education
+    sector: Education
+  - domain: libcomm.com
+    organization: Liberty / FLOW USVI
+    sector: Telecommunications
+  - domain: usvi.edu
+    organization: University of the Virgin Islands
+    sector: Education
+  - domain: usviber.org
+    organization: Bureau of Economic Research
+    sector: Government
+  - domain: vi.gov
+    organization: Government of the U.S. Virgin Islands
+    sector: Government
+  - domain: visitusvi.com
+    organization: USVI Department of Tourism
+    sector: Government
+  - domain: vivatrust.com
+    organization: Viya (broadband / telecom)
+    sector: Telecommunications
+  - domain: wapa.vi
+    organization: Water and Power Authority
+    sector: Government
+  - domain: vipd.gov.vi
+    organization: Virgin Islands Police Department
+    sector: Government
+  - domain: ltgov.gov.vi
+    organization: Office of the Lieutenant Governor
+    sector: Government
+  - domain: dph.gov.vi
+    organization: Department of Health
+    sector: Government

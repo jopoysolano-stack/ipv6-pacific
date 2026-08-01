@@ -13,7 +13,7 @@ Cross-check ideas against [`bookerpal/docs/security.md`](/Users/franck/code/book
 ## Controls implemented
 
 - **CSP and security headers** via `internal/httpserver` (see `cmd/web/main.go`): `Content-Security-Policy`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`; **HSTS** when TLS is enabled on the listener.
-- **ISO2 allowlist** for `/country/` and `/api/countries/` from `config/pacific_iso2.yaml`.
+- **ISO2 allowlist** for `/country/` and `/api/countries/` from the active region’s `config/{REGION}_iso2.yaml` (via `config/regions.yaml`).
 - **Rate limiting** on `/api/*` (excluding `/api/healthz`).
 - **HTML templates** use `html/template` auto-escaping for dynamic text.
 - **APNIC clients**: hostname allowlists in `internal/apniclabs` (`data1.labs.apnic.net`) and `internal/apnicstats` (`stats.labs.apnic.net`).
@@ -50,6 +50,10 @@ CI runs `go vet ./...` and `go test ./...`. Periodically run **`govulncheck ./..
 ## nginx / Caddy (production)
 
 Terminate TLS at the reverse proxy and forward **`X-Forwarded-For`** (and related headers) so rate limiting and client IP detection in `internal/httpserver` see the real client. The Go app also emits security headers; **avoid duplicating the same header in nginx and in Go** — pick one layer for CSP in particular.
+
+### Example production site (`caribbean.ipv6forum.com`)
+
+Duplicate the Pacific nginx pattern: proxy to **`https://localhost:8083`**, `server_name` caribbean (+ `ipv4.` / `ipv6.` probe hosts), TLS certs/SANs for those names, and Permissions-Policy / embed rules pointed at the Caribbean origin. Use `.env.caribbean` with `LISTEN=:8083` and matching `PROBE_*` URLs.
 
 ### Example production site (`pacific.ipv6forum.com`)
 

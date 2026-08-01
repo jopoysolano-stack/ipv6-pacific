@@ -1,0 +1,38 @@
+# Cayman Islands
+domains:
+  - domain: caymanairways.com
+    organization: Cayman Airways
+    sector: Government
+  - domain: digicelcayman.com
+    organization: Digicel Cayman Islands
+    sector: Telecommunications
+  - domain: education.gov.ky
+    organization: Ministry of Education
+    sector: Government
+  - domain: flowcayman.com
+    organization: FLOW Cayman
+    sector: Telecommunications
+  - domain: gov.ky
+    organization: Government of the Cayman Islands
+    sector: Government
+  - domain: health.gov.ky
+    organization: Ministry of Health
+    sector: Government
+  - domain: logic.ky
+    organization: Logic Communications Cayman
+    sector: Telecommunications
+  - domain: ofreg.ky
+    organization: Utility Regulation and Competition Office
+    sector: Government
+  - domain: ucci.edu.ky
+    organization: University College of the Cayman Islands
+    sector: Education
+  - domain: visitcaymanislands.com
+    organization: Cayman Islands Department of Tourism
+    sector: Government
+  - domain: cima.ky
+    organization: Cayman Islands Monetary Authority
+    sector: Government
+  - domain: customs.gov.ky
+    organization: Customs and Border Control
+    sector: Government

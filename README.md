@@ -1,19 +1,32 @@
-# Pacific Islands IPv6 / DNSSEC deployment monitor
+# Pacific / Caribbean IPv6 deployment monitor
 
-Go services:
+This project publishes **IPv6 (and related DNS/mail/web) deployment estimates** for island and coastal economies in the **Pacific** and the **Caribbean**. It supports [IPv6 Forum](https://www.ipv6forum.com/) regional work—starting with the Pacific Islands IPv6 Council—by measuring curated government, telecom/ISP, education, and regional-organisation domains, combining those checks with **APNIC Labs** capability data (and optional HE BGP / RIPEstat RPKI signals), and showing results on a public dashboard with an EEZ map and per-economy pages. Figures are **measurement estimates**, not a compliance certification.
 
-- **`cmd/collector`** — measures configured domains (NIST-style DNS / Mail / Web + simplified DNSSEC + **DMARC** `_dmarc` TXT), ingests **APNIC Labs** `v6economy/{CC}.json`, fetches **Hurricane Electric** [`bgp.he.net/country/{CC}`](https://bgp.he.net/) and merges per-ASN **IPv6 preferred** from [`stats.labs.apnic.net/ipv6/{CC}`](https://stats.labs.apnic.net/ipv6/TK) into `bgp_he_net`, samples per-ASN **RPKI** via [RIPEstat](https://stat.ripe.net/) (see **`COLLECTOR_SKIP_RPKI`** / **`COLLECTOR_SKIP_HE_BGP`** in `.env.example`), writes `data/countries/{ISO2}.json` and `data/index.json`.
-- **`cmd/web`** — serves the Afrinic-inspired UI, JSON API, Pacific EEZ overview (`static/img/EEZ_Oceania.svg`), and a sortable home economies table; the map and Deploy % / IPv6 pref. % cells use the same red→green ramp. The header includes a **your connection** control (border colors, optional dialog with addresses seen by the service). `index.json` includes `deployment_score_pct` per economy (mean RowScore / 4 × 100). HTML pages emit canonical / Open Graph / Twitter meta tags; **`GET /og/map.png`** renders a share-preview PNG (same ramp as the map when APNIC Labs `preferred_pc_raw` is in `index.json`). **`GET /robots.txt`** is served at the site root and references **`GET /sitemap.xml`** for crawlers (submit that URL in Google Search Console / Bing). Set **`PUBLIC_SITE_URL`** when TLS terminates in front of the app so canonical, social, and sitemap URLs use the public origin (see `.env.example`).
+The same Go codebase runs **one web + collector pair per region** (`REGION=pacific` or `REGION=caribbean`), each with its own data directory, listen port, and public hostname.
 
-Quick start:
+## Services
+
+- **`cmd/collector`** — measures configured domains (NIST-style DNS / Mail / Web + simplified DNSSEC + **DMARC** `_dmarc` TXT), ingests **APNIC Labs** `v6economy/{CC}.json`, fetches **Hurricane Electric** [`bgp.he.net/country/{CC}`](https://bgp.he.net/) and merges per-ASN **IPv6 preferred** from [`stats.labs.apnic.net/ipv6/{CC}`](https://stats.labs.apnic.net/ipv6/TK) into `bgp_he_net`, samples per-ASN **RPKI** via [RIPEstat](https://stat.ripe.net/), writes `data/{region}/countries/{ISO2}.json` and `data/{region}/index.json`.
+- **`cmd/web`** — serves the UI, JSON API, region EEZ overview (`static/img/EEZ_*.svg` from `config/regions.yaml`), and a sortable home economies table. Set **`PUBLIC_SITE_URL`** when TLS terminates in front of the app.
+
+## Quick start (Pacific)
 
 ```bash
 cp .env.example .env.local
-./scripts/gen_dev_certs.sh               # self-signed TLS → certs/*.pem (gitignored)
-./scripts/start_collector.sh -run-once              # all countries once; add -country=FJ for Fiji only
-./scripts/start_server.sh                # HTTPS on LISTEN (default :8082)
+cp .env.pacific.example .env.pacific   # optional; start scripts source it when present
+./scripts/gen_dev_certs.sh
+./scripts/start_collector.sh pacific -run-once
+./scripts/start_server.sh pacific     # HTTPS on :8082 → data/pacific
 ```
 
-Then open **`https://127.0.0.1:8082/`** (trust the dev certificate when prompted).
+## Caribbean (second instance on the same machine)
 
-**Documentation:** start at **[docs/index.md](docs/index.md)** — layered index; open linked files only as needed (small context window).
+```bash
+cp .env.caribbean.example .env.caribbean
+./scripts/start_collector.sh caribbean -run-once -country=JM
+./scripts/start_server.sh caribbean   # HTTPS on :8083 → data/caribbean
+```
+
+Then open **`https://127.0.0.1:8082/`** (Pacific) or **`:8083`** (Caribbean).
+
+**Documentation:** start at **[docs/index.md](docs/index.md)** — regions and domains: **[docs/config-and-domains.md](docs/config-and-domains.md)**.

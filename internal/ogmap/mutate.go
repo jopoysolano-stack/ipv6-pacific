@@ -2,6 +2,7 @@ package ogmap
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/beevik/etree"
 )
@@ -27,31 +28,42 @@ func ApplyPreferredToSVG(svgXML []byte, preferred map[string]float64) ([]byte, e
 
 	defs := firstChildTag(root, "defs")
 	ocean := findByID(root, "rect5538-5")
+	vbX, vbY, vbW, vbH := "0", "0", "385", "215"
+	if existing := root.SelectAttrValue("viewBox", ""); existing != "" {
+		parts := strings.Fields(strings.ReplaceAll(existing, ",", " "))
+		if len(parts) >= 4 {
+			vbX, vbY, vbW, vbH = parts[0], parts[1], parts[2], parts[3]
+		}
+	} else if w := root.SelectAttrValue("width", ""); w != "" {
+		if h := root.SelectAttrValue("height", ""); h != "" {
+			vbW, vbH = w, h
+		}
+	}
 	if ocean != nil && defs != nil {
 		idx := indexOfChild(root, defs)
 		if idx < 0 {
 			idx = 0
 		}
-		ocean.CreateAttr("x", "0")
-		ocean.CreateAttr("y", "0")
-		ocean.CreateAttr("width", "385")
-		ocean.CreateAttr("height", "215")
+		ocean.CreateAttr("x", vbX)
+		ocean.CreateAttr("y", vbY)
+		ocean.CreateAttr("width", vbW)
+		ocean.CreateAttr("height", vbH)
 		ocean.RemoveAttr("style")
 		ocean.CreateAttr("fill", "#c6ecff")
 		root.InsertChildAt(idx+1, ocean)
 	}
 
-	root.CreateAttr("viewBox", "0 0 385 215")
+	root.CreateAttr("viewBox", vbX+" "+vbY+" "+vbW+" "+vbH)
 	root.CreateAttr("preserveAspectRatio", "xMidYMid meet")
 	root.RemoveAttr("width")
 	root.RemoveAttr("height")
 
 	for _, path := range collectTag(root, "path") {
-		titleText := childTextTitle(path)
-		if titleText == "" {
+		label := territoryLabel(path)
+		if label == "" {
 			continue
 		}
-		iso := ISOForTerritoryTitle(titleText)
+		iso := ISOForTerritoryTitle(label)
 		clearPathPaint(path)
 		if iso == "" {
 			path.CreateAttr("fill", "#b8bcc4")
@@ -142,4 +154,12 @@ func childTextTitle(path *etree.Element) string {
 		}
 	}
 	return ""
+}
+
+// territoryLabel mirrors map-home.js: prefer <title> text, else path id.
+func territoryLabel(path *etree.Element) string {
+	if t := childTextTitle(path); t != "" {
+		return t
+	}
+	return normalizeTitle(path.SelectAttrValue("id", ""))
 }

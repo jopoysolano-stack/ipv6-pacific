@@ -39,27 +39,63 @@ var staticFS embed.FS
 func main() {
 	dotenv.Load()
 
-	dataDir := getenv("DATA_DIR", "./data")
-	addr := getenv("LISTEN", ":8082")
 	root := getenv("PROJECT_ROOT", ".")
-
-	pacific, err := config.LoadPacific(root)
+	regionID := config.RegionIDFromEnv()
+	region, err := config.ResolveRegion(root, regionID)
 	if err != nil {
-		log.Printf("warning: load pacific_iso2: %v", err)
+		log.Fatalf("region: %v", err)
 	}
-	allowed := config.AllowedISO(pacific)
+	if err := config.ValidateNoISOOverlap(root); err != nil {
+		log.Fatalf("region ISO overlap: %v", err)
+	}
+
+	probeurls.SetDefaultHost(region.DefaultHost)
+	ipv4outage.SetDefaultOutageHost(region.DefaultHost)
+
+	dataDir := strings.TrimSpace(os.Getenv("DATA_DIR"))
+	if dataDir == "" {
+		dataDir = config.DefaultDataDir(region.ID)
+	}
+	addr := getenv("LISTEN", region.DevListen)
+	if addr == "" {
+		addr = ":8082"
+	}
+
+	economies, err := config.LoadEconomies(root, region.ID)
+	if err != nil {
+		log.Fatalf("load economies for REGION=%s: %v", region.ID, err)
+	}
+	allowed := config.AllowedISO(economies)
+
+	titleMap, err := ogmap.LoadTitleToISOFile(config.EEZTitleISOPath(root, region.ID))
+	if err != nil {
+		if !os.IsNotExist(err) {
+			log.Fatalf("eez title map: %v", err)
+		}
+		titleMap = map[string]string{}
+		log.Printf("web: no eez title map at %s — map paths will not link until the file exists", config.EEZTitleISOPath(root, region.ID))
+	}
+	ogmap.SetTitleToISO(titleMap)
+	titleISOJSON, _ := json.Marshal(titleMap)
+
+	eezPath := "static/img/" + region.EEZSVG
+	_, eezErr := staticFS.ReadFile(eezPath)
+	showEEZMap := eezErr == nil
+
+	log.Printf("web: REGION=%s DATA_DIR=%s LISTEN=%s PUBLIC_SITE_URL=%q site=%q eez_map=%v",
+		region.ID, dataDir, addr, strings.TrimSpace(os.Getenv("PUBLIC_SITE_URL")), region.SiteName, showEEZMap)
 
 	tmpl, err := template.New("").Funcs(template.FuncMap{
-		"rowScore":        scoring.RowScore,
-		"dnssecCellClass": scoring.DNSSECCellClass,
-		"bgpheRowClass":   bgphe.RowClass,
-		"bgpheRowAria":    bgphe.RowAriaLabel,
-		"dmarcPctAttr":       dmarcPctAttr,
-		"dmarcInspectorURL":  dmarcInspectorURL,
-		"rpkiPctAttr":        rpkiPctAttr,
-		"rpkiDisplayPct":     rpkiDisplayPct,
-		"rpkiStatURL":        rpkiStatURL,
-		"rpkiStatusText":     rpkiStatusText,
+		"rowScore":          scoring.RowScore,
+		"dnssecCellClass":   scoring.DNSSECCellClass,
+		"bgpheRowClass":     bgphe.RowClass,
+		"bgpheRowAria":      bgphe.RowAriaLabel,
+		"dmarcPctAttr":      dmarcPctAttr,
+		"dmarcInspectorURL": dmarcInspectorURL,
+		"rpkiPctAttr":       rpkiPctAttr,
+		"rpkiDisplayPct":    rpkiDisplayPct,
+		"rpkiStatURL":       rpkiStatURL,
+		"rpkiStatusText":    rpkiStatusText,
 	}).ParseFS(templateFS, "templates/*.html", "templates/partials/*.html")
 	if err != nil {
 		log.Fatal(err)
@@ -75,7 +111,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("conn-status embed bundle: %v", err)
 	}
-	enrichOutage := enrichOutagePage(connBundle, publicSiteURL)
+	enrichOutage := enrichOutagePage(connBundle, publicSiteURL, region)
 
 	outageCfg := ipv4outage.LoadConfig()
 	ipv4outage.WarnForceInProduction(outageCfg)
@@ -92,24 +128,28 @@ func main() {
 	mux.HandleFunc("GET /favicon.ico", serveRootFaviconICO)
 	mux.HandleFunc("GET /robots.txt", serveRobotsTxt)
 	mux.HandleFunc("GET /sitemap.xml", func(w http.ResponseWriter, r *http.Request) {
-		serveSitemap(w, r, dataDir, pacific)
+		serveSitemap(w, r, dataDir, economies)
 	})
 	mux.HandleFunc("GET /og/map.png", func(w http.ResponseWriter, r *http.Request) {
-		serveOGMapPNG(w, r, dataDir)
+		serveOGMapPNG(w, r, dataDir, region, showEEZMap)
 	})
-	mux.HandleFunc("GET /embed", func(w http.ResponseWriter, r *http.Request) { embedPage(tmpl, w, r) })
+	mux.HandleFunc("GET /embed", func(w http.ResponseWriter, r *http.Request) { embedPage(tmpl, w, r, region) })
 	mux.HandleFunc("GET /embed/conn-status", func(w http.ResponseWriter, r *http.Request) {
-		serveEmbedConnStatus(tmpl, connBundle, w, r, publicSiteURL)
+		serveEmbedConnStatus(tmpl, connBundle, w, r, publicSiteURL, region)
 	})
 	mux.HandleFunc("GET /embed/conn-status/details", func(w http.ResponseWriter, r *http.Request) {
-		serveEmbedConnStatusDetails(tmpl, connBundle, w, r, publicSiteURL)
+		serveEmbedConnStatusDetails(tmpl, connBundle, w, r, publicSiteURL, region)
 	})
 	mux.HandleFunc("GET /embed/conn-status.js", func(w http.ResponseWriter, r *http.Request) {
 		serveEmbedScript(w, connBundle)
 	})
-	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) { home(tmpl, w, r, dataDir, pacific) })
-	mux.HandleFunc("GET /about", func(w http.ResponseWriter, r *http.Request) { aboutPage(tmpl, w, r) })
-	mux.HandleFunc("GET /country/{iso}", func(w http.ResponseWriter, r *http.Request) { countryPage(tmpl, w, r, dataDir, pacific, allowed) })
+	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
+		home(tmpl, w, r, dataDir, economies, region, showEEZMap, string(titleISOJSON))
+	})
+	mux.HandleFunc("GET /about", func(w http.ResponseWriter, r *http.Request) { aboutPage(tmpl, w, r, region) })
+	mux.HandleFunc("GET /country/{iso}", func(w http.ResponseWriter, r *http.Request) {
+		countryPage(tmpl, w, r, dataDir, economies, allowed, region)
+	})
 	mux.HandleFunc("GET /api/index.json", func(w http.ResponseWriter, r *http.Request) { serveFile(w, filepath.Join(dataDir, "index.json")) })
 	// {iso} must be a full path segment (Go 1.22+); use /api/countries/FJ not .../FJ.json
 	mux.HandleFunc("GET /api/countries/{iso}", func(w http.ResponseWriter, r *http.Request) {
@@ -259,7 +299,7 @@ func serveFile(w http.ResponseWriter, path string) {
 	w.Write(raw)
 }
 
-func seoMerge(r *http.Request, data map[string]any, title, metaDescription string) {
+func seoMerge(r *http.Request, data map[string]any, title, metaDescription, siteName string) {
 	p := r.URL.Path
 	if p == "" {
 		p = "/"
@@ -267,11 +307,16 @@ func seoMerge(r *http.Request, data map[string]any, title, metaDescription strin
 	data["MetaDescription"] = metaDescription
 	data["CanonicalURL"] = siteurl.AbsoluteURL(r, p)
 	data["OgTitle"] = title
-	data["OgSiteName"] = "Pacific Islands IPv6 Monitor"
+	data["OgSiteName"] = siteName
 	data["OgImageURL"] = siteurl.AbsoluteURL(r, "/og/map.png")
+	data["SiteName"] = siteName
 }
 
-func serveOGMapPNG(w http.ResponseWriter, r *http.Request, dataDir string) {
+func serveOGMapPNG(w http.ResponseWriter, r *http.Request, dataDir string, region *config.RegionMeta, showEEZMap bool) {
+	if !showEEZMap || region == nil {
+		writeOGFallback(w)
+		return
+	}
 	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
 	defer cancel()
 
@@ -284,7 +329,7 @@ func serveOGMapPNG(w http.ResponseWriter, r *http.Request, dataDir string) {
 		indexJSON = []byte("{}")
 	}
 
-	svgBytes, err := staticFS.ReadFile("static/img/EEZ_Oceania.svg")
+	svgBytes, err := staticFS.ReadFile("static/img/" + region.EEZSVG)
 	if err != nil {
 		log.Printf("og map: read svg: %v", err)
 		writeOGFallback(w)
@@ -336,7 +381,7 @@ func writeOGFallback(w http.ResponseWriter) {
 	_, _ = w.Write(b)
 }
 
-func home(tmpl *template.Template, w http.ResponseWriter, r *http.Request, dataDir string, pacific *config.PacificList) {
+func home(tmpl *template.Template, w http.ResponseWriter, r *http.Request, dataDir string, pacific *config.PacificList, region *config.RegionMeta, showEEZMap bool, titleISOJSON string) {
 	idxPath := filepath.Join(dataDir, "index.json")
 	raw, err := os.ReadFile(idxPath)
 	var idx model.Index
@@ -358,37 +403,44 @@ func home(tmpl *template.Template, w http.ResponseWriter, r *http.Request, dataD
 		borderClass = "border--ipv6"
 	}
 	probeV4, probeV6, probeDS := probeURLsFromEnv()
-	pageTitle := "Pacific Islands IPv6 Monitor"
-	metaDesc := "Pacific Islands IPv6 Monitor — IPv6 deployment estimates for Pacific economies from DNS, mail, and web checks plus APNIC Labs capability data."
+	pageTitle := region.SiteName
+	metaDesc := region.MetaDescription
 	data := map[string]any{
 		"Index":         idx,
 		"Title":         pageTitle,
+		"SiteName":      region.SiteName,
 		"BorderClass":   borderClass,
 		"FooterVariant": "home",
 		"Generated":     gen,
-		"EEZNotice":     "EEZ overview map: Wikimedia Commons — File:EEZ_Oceania.svg (author STyx, public domain). Source: https://commons.wikimedia.org/wiki/File:EEZ_Oceania.svg",
+		"EEZNotice":     region.EEZNotice,
+		"EEZSVG":        region.EEZSVG,
+		"MapAriaLabel":  region.MapAriaLabel,
+		"ShowEEZMap":    showEEZMap,
+		"TitleISOJSON":  titleISOJSON,
 		"ProbeV4":       probeV4,
 		"ProbeV6":       probeV6,
 		"ProbeDS":       probeDS,
 		"ShowDualProbe": probeV4 != "" && probeV6 != "",
 		"Nonce":         httpserver.CSPNonce(r),
 	}
-	seoMerge(r, data, pageTitle, metaDesc)
+	seoMerge(r, data, pageTitle, metaDesc, region.SiteName)
 	mergeOutagePageData(data)
 	_ = tmpl.ExecuteTemplate(w, "home.html", data)
 }
 
-func aboutPage(tmpl *template.Template, w http.ResponseWriter, r *http.Request) {
+func aboutPage(tmpl *template.Template, w http.ResponseWriter, r *http.Request, region *config.RegionMeta) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	borderClass := "border--ipv4"
 	if httpserver.IsIPv6Client(r) {
 		borderClass = "border--ipv6"
 	}
 	probeV4, probeV6, probeDS := probeURLsFromEnv()
-	pageTitle := "About — Pacific Islands IPv6 Monitor"
-	metaDesc := "Pacific Islands IPv6 Council and this deployment monitor — IPv6 roadmap for the Pacific, measurements, and council leadership."
+	pageTitle := "About — " + region.SiteName
+	metaDesc := region.AboutMetaDescription
 	data := map[string]any{
 		"Title":         pageTitle,
+		"SiteName":      region.SiteName,
+		"DefaultHost":   region.DefaultHost,
 		"BorderClass":   borderClass,
 		"FooterVariant": "about",
 		"ProbeV4":       probeV4,
@@ -397,12 +449,16 @@ func aboutPage(tmpl *template.Template, w http.ResponseWriter, r *http.Request) 
 		"ShowDualProbe": probeV4 != "" && probeV6 != "",
 		"Nonce":         httpserver.CSPNonce(r),
 	}
-	seoMerge(r, data, pageTitle, metaDesc)
+	seoMerge(r, data, pageTitle, metaDesc, region.SiteName)
 	mergeOutagePageData(data)
-	_ = tmpl.ExecuteTemplate(w, "about.html", data)
+	tpl := region.AboutTemplate
+	if tpl == "" {
+		tpl = "about_pacific.html"
+	}
+	_ = tmpl.ExecuteTemplate(w, tpl, data)
 }
 
-func countryPage(tmpl *template.Template, w http.ResponseWriter, r *http.Request, dataDir string, pacific *config.PacificList, allowed map[string]struct{}) {
+func countryPage(tmpl *template.Template, w http.ResponseWriter, r *http.Request, dataDir string, pacific *config.PacificList, allowed map[string]struct{}, region *config.RegionMeta) {
 	iso := strings.ToUpper(strings.TrimSpace(r.PathValue("iso")))
 	if err := config.ValidateISO(allowed, iso); err != nil {
 		http.Error(w, "not found", http.StatusNotFound)
@@ -411,7 +467,7 @@ func countryPage(tmpl *template.Template, w http.ResponseWriter, r *http.Request
 	path := filepath.Join(dataDir, "countries", iso+".json")
 	raw, err := os.ReadFile(path)
 	if err != nil {
-		countryComingSoon(tmpl, w, r, iso, pacific)
+		countryComingSoon(tmpl, w, r, iso, pacific, region)
 		return
 	}
 	var cf model.CountryFile
@@ -442,11 +498,12 @@ func countryPage(tmpl *template.Template, w http.ResponseWriter, r *http.Request
 	scoreLegend := scoring.CountryScoreLegend()
 	hasBGPHETable := cf.BGPHurricaneElectric != nil && len(cf.BGPHurricaneElectric.Networks) > 0
 	log.Printf("country legend rendered iso=%s status_items=%d check_items=%d location_items=%d has_results=%t has_bgp_he=%t", iso, len(statusLegend), len(checkLegend), len(locationLegend), len(cf.Domains) > 0, hasBGPHETable)
-	pageTitle := name + " — Pacific Islands IPv6 Monitor"
-	metaDesc := fmt.Sprintf("%s — IPv6 deployment estimates from DNS, mail, web checks and APNIC Labs data (Pacific Islands IPv6 Monitor).", name)
+	pageTitle := name + " — " + region.SiteName
+	metaDesc := fmt.Sprintf("%s — IPv6 deployment estimates from DNS, mail, web checks and APNIC Labs data (%s).", name, region.SiteName)
 	data := map[string]any{
 		"ISO":             iso,
 		"Name":            name,
+		"SiteName":        region.SiteName,
 		"Country":         cf,
 		"Summary":         sum,
 		"Title":           pageTitle,
@@ -468,12 +525,12 @@ func countryPage(tmpl *template.Template, w http.ResponseWriter, r *http.Request
 		"RPKIRampLegend":  scoring.RPKIRampLegend(),
 		"Nonce":           httpserver.CSPNonce(r),
 	}
-	seoMerge(r, data, pageTitle, metaDesc)
+	seoMerge(r, data, pageTitle, metaDesc, region.SiteName)
 	mergeOutagePageData(data)
 	_ = tmpl.ExecuteTemplate(w, "country.html", data)
 }
 
-func countryComingSoon(tmpl *template.Template, w http.ResponseWriter, r *http.Request, iso string, pacific *config.PacificList) {
+func countryComingSoon(tmpl *template.Template, w http.ResponseWriter, r *http.Request, iso string, pacific *config.PacificList, region *config.RegionMeta) {
 	name := iso
 	if pacific != nil {
 		for _, c := range pacific.Countries {
@@ -489,11 +546,12 @@ func countryComingSoon(tmpl *template.Template, w http.ResponseWriter, r *http.R
 		borderClass = "border--ipv6"
 	}
 	probeV4, probeV6, probeDS := probeURLsFromEnv()
-	pageTitle := name + " — Pacific Islands IPv6 Monitor"
-	metaDesc := fmt.Sprintf("%s — Pacific Islands IPv6 Monitor; collector results for this economy are not yet published.", name)
+	pageTitle := name + " — " + region.SiteName
+	metaDesc := fmt.Sprintf("%s — %s; collector results for this economy are not yet published.", name, region.SiteName)
 	data := map[string]any{
 		"ISO":           iso,
 		"Name":          name,
+		"SiteName":      region.SiteName,
 		"Title":         pageTitle,
 		"BorderClass":   borderClass,
 		"FooterVariant": "country",
@@ -503,7 +561,7 @@ func countryComingSoon(tmpl *template.Template, w http.ResponseWriter, r *http.R
 		"ShowDualProbe": probeV4 != "" && probeV6 != "",
 		"Nonce":         httpserver.CSPNonce(r),
 	}
-	seoMerge(r, data, pageTitle, metaDesc)
+	seoMerge(r, data, pageTitle, metaDesc, region.SiteName)
 	mergeOutagePageData(data)
 	_ = tmpl.ExecuteTemplate(w, "country_soon.html", data)
 }

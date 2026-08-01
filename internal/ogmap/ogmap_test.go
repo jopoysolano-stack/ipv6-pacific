@@ -9,7 +9,12 @@ import (
 
 func TestBuildMapPNG_smoke(t *testing.T) {
 	root := findProjectRoot(t)
-	svgPath := filepath.Join(root, "cmd/web/static/img/EEZ_Oceania.svg")
+	m, err := LoadTitleToISOFile(filepath.Join(root, "config", "eez_title_iso_pacific.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	SetTitleToISO(m)
+	svgPath := filepath.Join(root, "cmd/web/static/img/EEZ_Pacific.svg")
 	svg, err := os.ReadFile(svgPath)
 	if err != nil {
 		t.Fatal(err)

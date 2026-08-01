@@ -7,7 +7,16 @@ import (
 	"strings"
 )
 
-const defaultOutageHost = "pacific.ipv6forum.com"
+var defaultOutageHost = "pacific.ipv6forum.com"
+
+// SetDefaultOutageHost sets the fallback host when IPV4_OUTAGE_HOST and PUBLIC_SITE_URL are unset.
+func SetDefaultOutageHost(host string) {
+	host = strings.TrimSpace(host)
+	if host == "" {
+		return
+	}
+	defaultOutageHost = host
+}
 
 // Config holds IPv4 outage policy from the environment.
 type Config struct {

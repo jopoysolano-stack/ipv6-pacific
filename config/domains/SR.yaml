@@ -1,0 +1,41 @@
+# Suriname
+domains:
+  - domain: cbvs.sr
+    organization: Centrale Bank van Suriname
+    sector: Government
+  - domain: cq-link.sr
+    organization: CQ-Link (ISP)
+    sector: Telecommunications
+  - domain: digicel.sr
+    organization: Digicel Suriname
+    sector: Telecommunications
+  - domain: finance.gov.sr
+    organization: Ministerie van Financiën en Planning
+    sector: Government
+  - domain: gov.sr
+    organization: Overheid van Suriname
+    sector: Government
+  - domain: kabinet.sr
+    organization: Kabinet van de President
+    sector: Government
+  - domain: minfin.sr
+    organization: Ministerie van Financiën
+    sector: Government
+  - domain: minowc.sr
+    organization: Ministerie van Onderwijs, Wetenschap en Cultuur
+    sector: Government
+  - domain: mofa.gov.sr
+    organization: Ministerie van Buitenlandse Zaken, Internationale Business en Internationale Samenwerking
+    sector: Government
+  - domain: sr.net
+    organization: Suriname Internet (sr.net)
+    sector: Telecommunications
+  - domain: tas.sr
+    organization: Telecommunicatie Autoriteit Suriname
+    sector: Government
+  - domain: telesur.sr
+    organization: Telesur (Telecommunications Company Suriname)
+    sector: Telecommunications
+  - domain: uvs.edu
+    organization: Anton de Kom Universiteit van Suriname
+    sector: Education

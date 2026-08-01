@@ -9,7 +9,8 @@
 
 ```bash
 cp .env.example .env.local
-# Edit DATA_DIR if needed (default ./data)
+cp .env.pacific.example .env.pacific   # optional; start scripts source .env.{region}
+# DATA_DIR defaults to ./data/{region} via start scripts / REGION
 ```
 
 ### TLS for local web
@@ -23,10 +24,18 @@ This writes **`certs/cert.pem`** and **`certs/key.pem`** (gitignored). Then:
 ### Run web UI
 
 ```bash
-./scripts/start_server.sh
+./scripts/start_server.sh pacific      # :8082 → data/pacific
+./scripts/start_server.sh caribbean   # :8083 → data/caribbean (second terminal)
 ```
 
 Open **`https://127.0.0.1:8082/`** (accept the browser warning for the self-signed cert). Without collector output, the map and index may be empty — run the collector (below).
+
+### Run collector
+
+```bash
+./scripts/start_collector.sh pacific -run-once
+./scripts/start_collector.sh caribbean -run-once -country=JM
+```
 
 ### Run collector
 
@@ -76,13 +85,13 @@ HTML responses include `meta`/`link` tags for description, canonical URL, Open G
 
 Set **`PUBLIC_SITE_URL`** in `.env` to your public HTTPS origin when TLS terminates in front of Go (reverse proxy, CDN). If unset, canonical and social URLs derive from each request’s **`Host`** (and forwarded HTTPS hints).
 
-**`GET /og/map.png`** renders the EEZ overview map as a **1200×630 PNG** using embedded **`EEZ_Oceania.svg`** and **`data/index.json`**. Coloring matches the homepage EEZ map: **`pct-color-ramp.js`** stops and interpolation in **`internal/ogmap/ramp.go`**, and **only APNIC Labs `preferred_pc_raw`** drives the percentage (same rule as **`map-home.js`** — no deployment-score substitute). Gray means missing Labs data, same as in the browser. Responses include **`ETag`** and **`Cache-Control: public, max-age=300`**. On failure, the handler still returns **HTTP 200** with a small fallback PNG so `og:image` stays valid for crawlers.
+**`GET /og/map.png`** renders the EEZ overview map as a **1200×630 PNG** using the region’s embedded **`EEZ_*.svg`** (from `config/regions.yaml`) and **`data/{region}/index.json`**. Coloring matches the homepage EEZ map: **`pct-color-ramp.js`** stops and interpolation in **`internal/ogmap/ramp.go`**, and **only APNIC Labs `preferred_pc_raw`** drives the percentage (same rule as **`map-home.js`** — no deployment-score substitute). Gray means missing Labs data, same as in the browser. If the SVG is missing, a small fallback PNG is returned. Responses include **`ETag`** and **`Cache-Control: public, max-age=300`**.
 
 Rasterization is pure Go (**oksvg** + **rasterx**).
 
 ### Sitemap (Google / Bing)
 
-**`GET /sitemap.xml`** returns a [sitemaps.org](https://www.sitemaps.org/protocol.html) **urlset** for indexable HTML pages: home (`/`), about (`/about`), and one URL per economy in `config/pacific_iso2.yaml` as `/country/{ISO2}`. `lastmod` for `/` comes from `data/index.json`’s `generated_at`; for country pages it uses the on-disk mtime of `data/countries/{ISO2}.json` when that file exists.
+**`GET /sitemap.xml`** returns a [sitemaps.org](https://www.sitemaps.org/protocol.html) **urlset** for indexable HTML pages: home (`/`), about (`/about`), and one URL per economy in the **active region** `config/{REGION}_iso2.yaml` as `/country/{ISO2}`. `lastmod` for `/` comes from `data/{region}/index.json`’s `generated_at`; for country pages it uses the on-disk mtime of `data/{region}/countries/{ISO2}.json` when that file exists.
 
 Implementation: **`serveSitemap`** in [`cmd/web/sitemap.go`](../cmd/web/sitemap.go), registered in [`cmd/web/main.go`](../cmd/web/main.go). **`GET /robots.txt`** serves the embedded rules from `cmd/web/static/robots.txt` and appends a fully qualified **`Sitemap:`** line built with the same origin logic as canonical URLs (`siteurl`), so crawlers discover `/sitemap.xml` without hard-coding the public hostname.
 
@@ -98,17 +107,28 @@ See **`docs/commit-workflow.md`** (check changes since last push, doc updates, c
 
 ### Build and rsync
 
-See `scripts/push_to_prod.sh`. Set `PROD_DEST` to your `user@host:/path`. It builds Linux **`pacific-web`** and **`pacific-collector`**, rsyncs code + config — **never** ships `.env`.
+See `scripts/push_to_prod.sh`. Set `PROD_DEST` to your `user@host:/path`. It builds Linux **`pacific-web`** and **`pacific-collector`**, rsyncs code + config — **never** ships `.env` / `.env.*`.
 
-On the server, create **`/opt/ipv6-pacific/.env`** from `.env.example` (set `DATA_DIR`, `LISTEN`, `TLS_CERT_FILE`, `TLS_KEY_FILE`, etc.). **`pacific-web` and `pacific-collector` load `.env` / `.env.local` from the directory containing the executable (after resolving symlinks), then from the process working directory** — whichever comes first populates variables, and `godotenv` does not overwrite names already set in the environment. Prefer **`WorkingDirectory=/opt/ipv6-pacific`** so relative paths in `.env` (e.g. `PROJECT_ROOT=.`, cert paths) stay correct. If **`Environment=` or `EnvironmentFile=` pre-defines a key** (even as empty), values from `.env` for that key are skipped; remove duplicate keys from the unit if probes or other vars look unset. Run the collector as a separate service or cron so `data/` stays populated. **`data/` must be readable by the web service user** (e.g. `franck`). If you sometimes run the collector as **root**, set **`COLLECTOR_DATA_USER=franck`** (and optionally **`COLLECTOR_DATA_GROUP`**) so each successful run **`chown`s `DATA_DIR`** after writing; otherwise use **`chown -R franck:franck data`** or run the collector as **`User=franck`**. Without that, the UI can show “No index yet” even when `index.json` exists.
+### Env loading contract
 
-### systemd service (web)
+| Source | Role |
+|--------|------|
+| systemd `EnvironmentFile=.env.%i` + `Environment=REGION=%i` | Authoritative for region-specific keys in production |
+| `.env` / `.env.local` (godotenv) | Optional shared non-region defaults only (timeouts, TLS paths) — or omit on prod |
+| Local start scripts | Source `.env.{id}` when present, then set `REGION` / `DATA_DIR` / `LISTEN` |
 
-Install a unit such as **`/etc/systemd/system/ipv6-pacific-web.service`** (adjust `User`, `Group`, and paths if needed):
+**`pacific-web` and `pacific-collector` load `.env` / `.env.local` from the executable directory then cwd**; godotenv does **not** overwrite names already set. Prefer **`WorkingDirectory=/opt/ipv6-pacific`**. Do not put `DATA_DIR`, `LISTEN`, `PUBLIC_SITE_URL`, `PROBE_*`, or `REGION` in a shared `.env` used by multiple instances.
+
+**DATA_DIR migration:** legacy `./data/countries` + `index.json` belong under `./data/pacific/`. Caribbean uses `./data/caribbean/`.
+
+**`data/{region}/` must be readable by the web service user.** If the collector runs as **root**, set **`COLLECTOR_DATA_USER`**.
+
+### systemd template units
 
 ```ini
+# /etc/systemd/system/ipv6-web@.service
 [Unit]
-Description=Pacific IPv6 Monitor (web)
+Description=IPv6 Monitor web (%i)
 After=network-online.target
 Wants=network-online.target
 
@@ -117,12 +137,11 @@ Type=simple
 User=franck
 Group=franck
 WorkingDirectory=/opt/ipv6-pacific
-# Optional: systemd can load env instead of/in addition to .env — use one consistent approach
-# EnvironmentFile=/opt/ipv6-pacific/.env
+EnvironmentFile=/opt/ipv6-pacific/.env.%i
+Environment=REGION=%i
 ExecStart=/opt/ipv6-pacific/pacific-web
 Restart=on-failure
 RestartSec=5
-# Hardening (adjust if something breaks)
 NoNewPrivileges=true
 PrivateTmp=true
 
@@ -130,19 +149,21 @@ PrivateTmp=true
 WantedBy=multi-user.target
 ```
 
-Then:
+Same pattern for **`ipv6-collector@.service`** → `pacific-collector`. Missing `.env.%i` fails the unit (no `-` on `EnvironmentFile=`).
 
 ```bash
+# Cutover from legacy ipv6-pacific-web:
+# sudo systemctl disable --now ipv6-pacific-web
 sudo systemctl daemon-reload
-sudo systemctl enable --now ipv6-pacific-web
-sudo systemctl status ipv6-pacific-web
+sudo systemctl enable --now ipv6-web@pacific ipv6-collector@pacific
+sudo systemctl enable --now ipv6-web@caribbean ipv6-collector@caribbean
 ```
 
-Put a reverse proxy in front if you terminate public TLS elsewhere; see `docs/security.md` for an **nginx** example (`pacific.ipv6forum.com`) and **`X-Forwarded-For`**.
+Put a reverse proxy in front; see `docs/security.md` for nginx examples (`pacific.ipv6forum.com`, `caribbean.ipv6forum.com`).
 
 ## TLS / dual-stack border
 
-Three probe URLs (full `https://host/.../api/healthz` paths, TLS SAN coverage). When **`PROBE_*_URL`** is unset, **`internal/probeurls`** supplies defaults from **`PUBLIC_SITE_URL`** (or `pacific.ipv6forum.com`): `https://ipv4.<host>/api/healthz`, `https://ipv6.<host>/api/healthz`, and `https://<host>/api/healthz`.
+Three probe URLs (full `https://host/.../api/healthz` paths, TLS SAN coverage). When **`PROBE_*_URL`** is unset, **`internal/probeurls`** supplies defaults from **`PUBLIC_SITE_URL`** or the region **`default_host`** in `config/regions.yaml`: `https://ipv4.<host>/api/healthz`, `https://ipv6.<host>/api/healthz`, and `https://<host>/api/healthz`.
 
 | Env | Hostname role | Purpose |
 |-----|----------------|---------|
@@ -198,7 +219,11 @@ curl -sk -H 'Host: pacific.ipv6forum.com' -H 'X-Forwarded-For: 2001:db8::1' http
 ./scripts/ipv4_outage_report.sh --date 2026-06-06 --geo   # optional country lookup via ip-api.com (~1h)
 ```
 
-The report merges **journald** (`ipv4_outage` JSON lines from `ipv6-pacific-web`) and **nginx** access logs. Primary tables exclude **exempt paths** still reachable on IPv4 during the drill (`/api/healthz`, embed assets, crawler paths). It prints counts and **percentages** by connection stack (IPv4 vs IPv6) and a merged User-Agent family table (total, IPv4/IPv6 split, ×signal rate, unique IPs per stack). Requires `python3`, read access to `/var/log/nginx/`, and `journalctl` (often via `sudo`).
+The report merges **journald** (`ipv4_outage` JSON lines from **`ipv6-web@pacific`** or **`ipv6-web@caribbean`**) and **nginx** access logs. Primary tables exclude **exempt paths** still reachable on IPv4 during the drill (`/api/healthz`, embed assets, crawler paths). It prints counts and **percentages** by connection stack (IPv4 vs IPv6) and a merged User-Agent family table (total, IPv4/IPv6 split, ×signal rate, unique IPs per stack). Requires `python3`, read access to `/var/log/nginx/`, and `journalctl` (often via `sudo`).
+
+```bash
+./scripts/ipv4_outage_report.sh --date 2026-06-06 --service ipv6-web@pacific
+```
 
 Local smoke test with fixtures:
 
@@ -218,7 +243,7 @@ Local smoke test with fixtures:
 
 The **IPv4-unavailable page** sends `Retry-Over-IPv6-Recovery` when the IPv6 probe succeeds (`data-outage-token` on the conn-status widget). Recovery token match rate appears in the report summary.
 
-**Production rollout:** deploy `pacific-web`, set **`PUBLIC_SITE_URL`**, confirm **`IPV4_OUTAGE_FORCE`** is unset, restart **`ipv6-pacific-web`**. Announce the drill externally before the first event.
+**Production rollout:** deploy binaries, set per-region **`.env.%i`** / **`PUBLIC_SITE_URL`**, confirm **`IPV4_OUTAGE_FORCE`** is unset, restart **`ipv6-web@*`** / **`ipv6-collector@*`**. Announce the drill externally before the first event. Caribbean ships with **`IPV4_OUTAGE_SKIP=1`** until announced.
 
 ## DMARC and RPKI (collector v0.3+)
 

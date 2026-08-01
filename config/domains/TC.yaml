@@ -1,0 +1,38 @@
+# Turks and Caicos Islands
+domains:
+  - domain: digiceltci.com
+    organization: Digicel Turks and Caicos
+    sector: Telecommunications
+  - domain: education.gov.tc
+    organization: Ministry of Education
+    sector: Government
+  - domain: flowtci.com
+    organization: FLOW Turks and Caicos
+    sector: Telecommunications
+  - domain: gov.tc
+    organization: Government of the Turks and Caicos Islands
+    sector: Government
+  - domain: health.gov.tc
+    organization: Ministry of Health
+    sector: Government
+  - domain: investturksandcaicos.tc
+    organization: Invest Turks and Caicos
+    sector: Government
+  - domain: tourism.tc
+    organization: Turks and Caicos Tourist Board
+    sector: Government
+  - domain: visittci.com
+    organization: Turks and Caicos Tourism
+    sector: Government
+  - domain: tciuniversity.tc
+    organization: Turks and Caicos Islands Community College / University
+    sector: Education
+  - domain: customs.gov.tc
+    organization: Customs Department
+    sector: Government
+  - domain: telecoms.gov.tc
+    organization: Telecommunications Commission
+    sector: Government
+  - domain: statistics.gov.tc
+    organization: Statistics Department
+    sector: Government

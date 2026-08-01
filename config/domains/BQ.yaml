@@ -1,0 +1,38 @@
+# Caribbean Netherlands (Bonaire, Sint Eustatius, Saba)
+domains:
+  - domain: rijksdienstcn.com
+    organization: Rijksdienst Caribisch Nederland
+    sector: Government
+  - domain: bonairegov.com
+    organization: Openbaar Lichaam Bonaire
+    sector: Government
+  - domain: statiagovernment.com
+    organization: Openbaar Lichaam Sint Eustatius
+    sector: Government
+  - domain: sabagov.nl
+    organization: Openbaar Lichaam Saba
+    sector: Government
+  - domain: tourismbonaire.com
+    organization: Tourism Corporation Bonaire
+    sector: Government
+  - domain: telbo.net
+    organization: Telbo N.V. (Bonaire telecom)
+    sector: Telecommunications
+  - domain: flogbonaire.com
+    organization: FLOW / Liberty Caribbean Bonaire
+    sector: Telecommunications
+  - domain: digicelbonaire.com
+    organization: Digicel Bonaire
+    sector: Telecommunications
+  - domain: eutech.edu.bq
+    organization: University of Applied Sciences / tertiary Bonaire
+    sector: Education
+  - domain: scholengemeenschapbonaire.com
+    organization: Scholengemeenschap Bonaire
+    sector: Education
+  - domain: cbs.nl
+    organization: Statistics Netherlands (CN data)
+    sector: Government
+  - domain: knmi.nl
+    organization: KNMI (weather services for CN)
+    sector: Government

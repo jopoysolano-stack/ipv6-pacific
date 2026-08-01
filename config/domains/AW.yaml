@@ -1,0 +1,38 @@
+# Aruba
+domains:
+  - domain: aruba.com
+    organization: Aruba Tourism Authority
+    sector: Government
+  - domain: gobierno.aw
+    organization: Government of Aruba
+    sector: Government
+  - domain: overheid.aw
+    organization: Government of Aruba (Dutch portal)
+    sector: Government
+  - domain: setar.aw
+    organization: SETAR N.V. (telecom)
+    sector: Telecommunications
+  - domain: digicelaruba.com
+    organization: Digicel Aruba
+    sector: Telecommunications
+  - domain: ua.aw
+    organization: University of Aruba
+    sector: Education
+  - domain: colegiopascal.edu.aw
+    organization: Colegio Pascal
+    sector: Education
+  - domain: douane.aw
+    organization: Customs Aruba
+    sector: Government
+  - domain: belastingdienst.aw
+    organization: Tax Department Aruba
+    sector: Government
+  - domain: cbs.aw
+    organization: Central Bureau of Statistics Aruba
+    sector: Government
+  - domain: mirant.aw
+    organization: WEB Aruba / utilities information
+    sector: Government
+  - domain: airportaruba.com
+    organization: Aruba Airport Authority
+    sector: Government

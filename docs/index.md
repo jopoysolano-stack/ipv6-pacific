@@ -10,7 +10,7 @@ Project “memory” for humans and Cursor-style agents: **start here**, then **
 | Security notes | [security.md](security.md) |
 | **Embed widget** (iframe / script, nginx, drill exemptions) | [embed.md](embed.md) |
 | Commits / PR workflow | [commit-workflow.md](commit-workflow.md) |
-| **`config/`**, economies list, **`domains/{ISO2}.yaml`**, regional HQ rules | [config-and-domains.md](config-and-domains.md) |
+| **`config/`**, regions registry, economies list, **`domains/{ISO2}.yaml`**, regional HQ rules | [config-and-domains.md](config-and-domains.md) |
 
 Nested detail:
 

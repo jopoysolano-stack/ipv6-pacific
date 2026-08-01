@@ -25,6 +25,8 @@ mkdir -p "$TEMP_DIR/web"
 cp -r cmd/web/static cmd/web/templates "$TEMP_DIR/cmd/web/"
 cp go.mod go.sum "$TEMP_DIR/"
 [[ -f .env.example ]] && cp .env.example "$TEMP_DIR/"
+[[ -f .env.pacific.example ]] && cp .env.pacific.example "$TEMP_DIR/"
+[[ -f .env.caribbean.example ]] && cp .env.caribbean.example "$TEMP_DIR/"
 cp -r scripts docs NOTICE "$TEMP_DIR/" 2>/dev/null || true
 
 echo "Staging layout:"
@@ -43,6 +45,8 @@ rsync -avz --delete \
   --include='go.mod' \
   --include='go.sum' \
   --include='.env.example' \
+  --include='.env.pacific.example' \
+  --include='.env.caribbean.example' \
   --include='scripts/' \
   --include='scripts/**' \
   --include='docs/' \
@@ -52,4 +56,4 @@ rsync -avz --delete \
   "$TEMP_DIR/" "$PROD_DEST"
 
 rm -f pacific-web pacific-collector
-echo "Done. On server: configure .env, systemd units for pacific-web + pacific-collector, restart services."
+echo "Done. On server: configure .env.pacific / .env.caribbean, enable ipv6-web@ / ipv6-collector@ instances, restart services."

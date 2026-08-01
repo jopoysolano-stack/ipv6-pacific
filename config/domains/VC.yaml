@@ -1,0 +1,38 @@
+# Saint Vincent and the Grenadines
+domains:
+  - domain: digicelsvg.com
+    organization: Digicel St. Vincent and the Grenadines
+    sector: Telecommunications
+  - domain: education.gov.vc
+    organization: Ministry of Education
+    sector: Government
+  - domain: flowsvg.com
+    organization: FLOW St. Vincent and the Grenadines
+    sector: Telecommunications
+  - domain: gov.vc
+    organization: Government of St. Vincent and the Grenadines
+    sector: Government
+  - domain: health.gov.vc
+    organization: Ministry of Health
+    sector: Government
+  - domain: discoversvg.com
+    organization: Tourism Authority
+    sector: Government
+  - domain: finance.gov.vc
+    organization: Ministry of Finance
+    sector: Government
+  - domain: svgcc.vc
+    organization: St. Vincent and the Grenadines Community College
+    sector: Education
+  - domain: ntrc.vc
+    organization: National Telecommunications Regulatory Commission
+    sector: Government
+  - domain: customs.gov.vc
+    organization: Customs and Excise Department
+    sector: Government
+  - domain: foreign.gov.vc
+    organization: Ministry of Foreign Affairs
+    sector: Government
+  - domain: uwi.edu
+    organization: The University of the West Indies (Open Campus)
+    sector: Education

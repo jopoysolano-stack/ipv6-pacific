@@ -1,0 +1,44 @@
+# The Bahamas
+domains:
+  - domain: aliv.com
+    organization: ALIV (The Bahamas)
+    sector: Telecommunications
+  - domain: bahamas.com
+    organization: Bahamas official tourism
+    sector: Government
+  - domain: bahamas.gov.bs
+    organization: Government of The Bahamas
+    sector: Government
+  - domain: btcbahamas.com
+    organization: Bahamas Telecommunications Company (BTC)
+    sector: Telecommunications
+  - domain: centralbankbahamas.com
+    organization: Central Bank of The Bahamas
+    sector: Government
+  - domain: cob.edu.bs
+    organization: College of The Bahamas (legacy; now University of The Bahamas)
+    sector: Education
+  - domain: mof.gov.bs
+    organization: Ministry of Finance
+    sector: Government
+  - domain: mofa.gov.bs
+    organization: Ministry of Foreign Affairs
+    sector: Government
+  - domain: myaliv.com
+    organization: ALIV customer portal
+    sector: Telecommunications
+  - domain: mygateway.gov.bs
+    organization: MyGateway Bahamas (government services)
+    sector: Government
+  - domain: royalbahamaspolice.org
+    organization: Royal Bahamas Police Force
+    sector: Government
+  - domain: tourismbahamas.com
+    organization: Bahamas Ministry of Tourism
+    sector: Government
+  - domain: ub.edu.bs
+    organization: University of The Bahamas
+    sector: Education
+  - domain: urcabahamas.bs
+    organization: Utilities Regulation and Competition Authority
+    sector: Government

@@ -1,0 +1,38 @@
+# Saint Martin (French collectivity)
+domains:
+  - domain: com-saint-martin.fr
+    organization: Collectivité de Saint-Martin
+    sector: Government
+  - domain: saint-martin.org
+    organization: Collectivité / destination Saint-Martin
+    sector: Government
+  - domain: pref.st-barthelemy.gouv.fr
+    organization: Préfecture de Saint-Barthélemy et Saint-Martin
+    sector: Government
+  - domain: st-martin.gouv.fr
+    organization: State services Saint-Martin
+    sector: Government
+  - domain: dauphintelecom.com
+    organization: Dauphin Telecom
+    sector: Telecommunications
+  - domain: orange.fr
+    organization: Orange Caraïbe
+    sector: Telecommunications
+  - domain: sfr.fr
+    organization: SFR
+    sector: Telecommunications
+  - domain: digicelantilles.com
+    organization: Digicel Antilles
+    sector: Telecommunications
+  - domain: ac-guadeloupe.fr
+    organization: Académie de Guadeloupe (education authority)
+    sector: Education
+  - domain: univ-antilles.fr
+    organization: Université des Antilles
+    sector: Education
+  - domain: st-martin-tourism.com
+    organization: Saint-Martin Tourism Office
+    sector: Government
+  - domain: arcep.fr
+    organization: ARCEP
+    sector: Government

@@ -1,0 +1,38 @@
+# Sint Maarten
+domains:
+  - domain: digicelsxm.com
+    organization: Digicel Sint Maarten
+    sector: Telecommunications
+  - domain: flowsxm.com
+    organization: FLOW Sint Maarten
+    sector: Telecommunications
+  - domain: gov.sx
+    organization: Government of Sint Maarten
+    sector: Government
+  - domain: sintmaartengov.org
+    organization: Government of Sint Maarten
+    sector: Government
+  - domain: destinationstmaarten.com
+    organization: St. Maarten Tourist Bureau
+    sector: Government
+  - domain: usm.sx
+    organization: University of St. Martin
+    sector: Education
+  - domain: nask.sx
+    organization: National Alliance / education services
+    sector: Education
+  - domain: bureau-telecom.sx
+    organization: Bureau Telecommunicatie en Post
+    sector: Government
+  - domain: centralbank.cw
+    organization: Centrale Bank van Curaçao en Sint Maarten
+    sector: Government
+  - domain: sxm-airport.com
+    organization: Princess Juliana International Airport
+    sector: Government
+  - domain: statistics.sx
+    organization: Department of Statistics
+    sector: Government
+  - domain: telcell.sx
+    organization: TelCell / local telecom
+    sector: Telecommunications

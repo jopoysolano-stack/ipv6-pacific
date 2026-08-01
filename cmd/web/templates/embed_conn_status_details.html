@@ -30,7 +30,7 @@
       <button type="button" class="conn-status-details__close">Close</button>
     </div>
     <p class="conn-status-attribution">
-      <a href="{{.SiteURL}}/">Pacific Islands IPv6 Monitor</a>
+      <a href="{{.SiteURL}}/">{{if .SiteName}}{{.SiteName}}{{else}}IPv6 Monitor{{end}}</a>
     </p>
   </div>
   <script nonce="{{.Nonce}}">{{.InlineDetailsJS}}</script>

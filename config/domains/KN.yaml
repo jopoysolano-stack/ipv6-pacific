@@ -1,0 +1,38 @@
+# Saint Kitts and Nevis
+domains:
+  - domain: cbc.kn
+    organization: Cable & Wireless / FLOW St. Kitts and Nevis
+    sector: Telecommunications
+  - domain: digicelstkittsandnevis.com
+    organization: Digicel St. Kitts and Nevis
+    sector: Telecommunications
+  - domain: education.gov.kn
+    organization: Ministry of Education
+    sector: Government
+  - domain: foreign.gov.kn
+    organization: Ministry of Foreign Affairs
+    sector: Government
+  - domain: gov.kn
+    organization: Government of St. Kitts and Nevis
+    sector: Government
+  - domain: health.gov.kn
+    organization: Ministry of Health
+    sector: Government
+  - domain: nevisisland.com
+    organization: Nevis Island Administration / tourism
+    sector: Government
+  - domain: stkittstourism.kn
+    organization: St. Kitts Tourism Authority
+    sector: Government
+  - domain: thecstu.edu.kn
+    organization: Clarence Fitzroy Bryant College
+    sector: Education
+  - domain: ums.edu.kn
+    organization: University of Medicine and Health Sciences
+    sector: Education
+  - domain: ntrc.kn
+    organization: National Telecommunications Regulatory Commission
+    sector: Government
+  - domain: customs.gov.kn
+    organization: Customs and Excise
+    sector: Government

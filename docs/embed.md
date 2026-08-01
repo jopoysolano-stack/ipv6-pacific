@@ -14,7 +14,7 @@ Third-party sites can embed the Pacific Islands IPv6 Monitor **connection-status
 ></iframe>
 ```
 
-Replace the origin with your public site URL (`PUBLIC_SITE_URL` in production).
+Replace the origin with your public site URL (`PUBLIC_SITE_URL` for that region). Examples below use Pacific; Caribbean uses `https://caribbean.ipv6forum.com` the same way.
 
 When visitors click the status button, connection details open in a **popup window** (`/embed/conn-status/details`) — no iframe resizing is needed on the host page.
 

@@ -1,0 +1,43 @@
+# Barbados — Caribbean Development Bank headquarters in Wildey, St. Michael.
+# Digicel/FLOW consumer sites often use digicelgroup.com and discoverflow.co paths (see JM).
+domains:
+  - domain: barbados.gov.bb
+    organization: Government of Barbados
+    sector: Government
+  - domain: bcc.edu.bb
+    organization: Barbados Community College
+    sector: Education
+  - domain: bra.gov.bb
+    organization: Barbados Revenue Authority
+    sector: Government
+  - domain: caribank.org
+    organization: Caribbean Development Bank
+    sector: Regional
+    regional: true
+  - domain: cavehill.uwi.edu
+    organization: The University of the West Indies, Cave Hill Campus
+    sector: Education
+  - domain: centralbank.org.bb
+    organization: Central Bank of Barbados
+    sector: Government
+  - domain: discoverflow.co
+    organization: FLOW Barbados / Liberty Latin America (FLOW Caribbean)
+    sector: Telecommunications
+  - domain: education.gov.bb
+    organization: Ministry of Educational Transformation
+    sector: Government
+  - domain: foreign.gov.bb
+    organization: Ministry of Foreign Affairs and Foreign Trade
+    sector: Government
+  - domain: gisbarbados.gov.bb
+    organization: Barbados Government Information Service
+    sector: Government
+  - domain: health.gov.bb
+    organization: Ministry of Health and Wellness
+    sector: Government
+  - domain: sjpi.edu.bb
+    organization: Samuel Jackman Prescod Institute of Technology
+    sector: Education
+  - domain: visitbarbados.org
+    organization: Barbados Tourism Marketing Inc.
+    sector: Government

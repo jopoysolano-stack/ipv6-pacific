@@ -13,6 +13,9 @@ import (
 	"github.com/pacific-monitor/pacific-monitor/internal/ripestat"
 )
 
+// DefaultRipestatSourceApp is used when RIPESTAT_SOURCEAPP is unset (set from region registry at startup).
+var DefaultRipestatSourceApp = "pacific-ipv6-monitor"
+
 // EnrichBGPRPKI updates RPKI fields on BGP rows using RIPEstat, with carry-forward and refresh interval.
 func EnrichBGPRPKI(ctx context.Context, he *model.BGPHETable, prev *model.BGPHETable, client *ripestat.Client, verbose bool, iso2 string) {
 	if he == nil || len(he.Networks) == 0 || client == nil {
@@ -96,7 +99,7 @@ func SkipRPKI() bool {
 func NewRipestatClient(hc *http.Client) *ripestat.Client {
 	sourceApp := strings.TrimSpace(os.Getenv("RIPESTAT_SOURCEAPP"))
 	if sourceApp == "" {
-		sourceApp = "pacific-ipv6-monitor"
+		sourceApp = DefaultRipestatSourceApp
 	}
 	interval := durationEnv("COLLECTOR_RPKI_MIN_INTERVAL", 300*time.Millisecond)
 	return ripestat.NewClient(hc, sourceApp, interval)

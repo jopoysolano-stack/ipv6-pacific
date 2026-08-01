@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{.Title}}</title>
+  {{template "seo" .}}
+  {{template "analyticsHead" .}}
+  <link rel="stylesheet" href="/static/css/style.css"/>
+</head>
+<body class="{{.BorderClass}}">
+  {{template "siteBanners" .}}
+  <header class="site-header">
+    <div class="site-header__lead">
+      <p><a href="/">← {{.SiteName}}</a></p>
+      <h1>About</h1>
+      <p class="meta">Caribbean IPv6 deployment monitoring.</p>
+    </div>
+    <div class="site-header__conn">
+      {{template "connStatusButton" .}}
+    </div>
+  </header>
+
+  <main>
+    <section class="country-detail-section" aria-labelledby="about-purpose">
+      <h2 id="about-purpose">This site</h2>
+      <p>This monitor publishes IPv6 deployment-oriented measurements (DNS, mail, web, DNSSEC, and APNIC Labs–style capability signals) for Caribbean economies. They are estimates from measurement, not a compliance certification. Gray cells on the EEZ map mean APNIC Labs preferred-% data is not available for that economy.</p>
+    </section>
+
+    <section class="country-detail-section" aria-labelledby="about-forum">
+      <h2 id="about-forum">IPv6 Forum</h2>
+      <p>The site supports the broader goals of the <a href="https://www.ipv6forum.com/" target="_blank" rel="noopener">IPv6 Forum</a> to advance IPv6 deployment. Caribbean-specific council narrative can be expanded here as the regional chapter evolves.</p>
+    </section>
+
+    <section class="country-detail-section" aria-labelledby="ipv6-day-drill">
+      <h2 id="ipv6-day-drill">Monthly 6/6 IPv4 drill</h2>
+      <p>When enabled for this hostname, on the <strong>6th of every month (UTC)</strong> the main dual-stack site can run a planned 24-hour IPv4 maintenance window. During that window, connections over IPv4 receive an intentional “use IPv6 instead” signal while the service remains available over IPv6.</p>
+      <p>Caribbean launch defaults to <code>IPV4_OUTAGE_SKIP=1</code> until the drill is publicly announced for <code>{{.DefaultHost}}</code>. Operators control the drill with <code>IPV4_OUTAGE_SKIP</code> / <code>IPV4_OUTAGE_FORCE</code>; see <code>docs/development.md</code>.</p>
+    </section>
+
+    <section class="country-detail-section" aria-labelledby="about-why-v6">
+      <h2 id="about-why-v6">Why IPv6</h2>
+      <p>The Internet has relied on IPv4 for decades. IPv4 address space is depleted and operational constraints grow; IPv6 preserves what works today while adding vastly more address space and clearer operational models.</p>
+    </section>
+  </main>
+
+  {{template "siteFooter" .}}
+
+  {{template "connStatusDialog" .}}
+
+  <script src="/static/js/pct-color-ramp.js"></script>
+  <script nonce="{{.Nonce}}">
+    window.__PROBE_V4__ = {{if .ProbeV4}}"{{.ProbeV4}}"{{else}}""{{end}};
+    window.__PROBE_V6__ = {{if .ProbeV6}}"{{.ProbeV6}}"{{else}}""{{end}};
+    window.__PROBE_DS__ = {{if .ProbeDS}}"{{.ProbeDS}}"{{else}}""{{end}};
+  </script>
+  <script src="/static/js/conn-status-probe.js"></script>
+  <script src="/static/js/conn-status-ui.js"></script>
+  <script src="/static/js/border.js"></script>
+  <script src="/static/js/cookie-consent.js" defer></script>
+</body>
+</html>

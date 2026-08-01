@@ -1,0 +1,38 @@
+# Bermuda
+domains:
+  - domain: gov.bm
+    organization: Government of Bermuda
+    sector: Government
+  - domain: bermudatourism.com
+    organization: Bermuda Tourism Authority
+    sector: Government
+  - domain: digicelbermuda.com
+    organization: Digicel Bermuda
+    sector: Telecommunications
+  - domain: onew.bm
+    organization: One Communications
+    sector: Telecommunications
+  - domain: logic.bm
+    organization: Logic Communications
+    sector: Telecommunications
+  - domain: bercol.bm
+    organization: Bermuda College
+    sector: Education
+  - domain: bermudaschools.bm
+    organization: Department of Education / schools portal
+    sector: Education
+  - domain: rba.bm
+    organization: Regulatory Authority of Bermuda
+    sector: Government
+  - domain: bma.bm
+    organization: Bermuda Monetary Authority
+    sector: Government
+  - domain: customs.bm
+    organization: HM Customs Bermuda
+    sector: Government
+  - domain: parliament.bm
+    organization: Bermuda Parliament
+    sector: Government
+  - domain: belco.bm
+    organization: BELCO (electricity utility)
+    sector: Government

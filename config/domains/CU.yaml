@@ -1,0 +1,53 @@
+# Cuba — Spanish state domains; ETECSA is the national telco.
+domains:
+  - domain: cubadebate.cu
+    organization: Cubadebate
+    sector: Government
+  - domain: cubagob.cu
+    organization: Gobierno de la República de Cuba
+    sector: Government
+  - domain: cubasi.cu
+    organization: CubaSí
+    sector: Government
+  - domain: cubatravel.cu
+    organization: Cuba Travel (turismo oficial)
+    sector: Government
+  - domain: ecured.cu
+    organization: EcuRed
+    sector: Government
+  - domain: etecsa.cu
+    organization: Empresa de Telecomunicaciones de Cuba S.A. (ETECSA)
+    sector: Telecommunications
+  - domain: granma.cu
+    organization: Granma
+    sector: Government
+  - domain: juventudrebelde.cu
+    organization: Juventud Rebelde
+    sector: Government
+  - domain: mincom.gob.cu
+    organization: Ministerio de Comunicaciones
+    sector: Government
+  - domain: minrex.gob.cu
+    organization: Ministerio de Relaciones Exteriores
+    sector: Government
+  - domain: mintur.gob.cu
+    organization: Ministerio de Turismo
+    sector: Government
+  - domain: presidencia.gob.cu
+    organization: Presidencia y Gobierno de la República de Cuba
+    sector: Government
+  - domain: radiohc.cu
+    organization: Radio Habana Cuba
+    sector: Government
+  - domain: ucf.edu.cu
+    organization: Universidad de Cienfuegos
+    sector: Education
+  - domain: uclv.edu.cu
+    organization: Universidad Central "Marta Abreu" de Las Villas
+    sector: Education
+  - domain: uh.cu
+    organization: Universidad de La Habana
+    sector: Education
+  - domain: uho.edu.cu
+    organization: Universidad de Holguín
+    sector: Education

@@ -1,0 +1,35 @@
+# Antigua and Barbuda
+domains:
+  - domain: ab.gov.ag
+    organization: Government of Antigua and Barbuda portal
+    sector: Government
+  - domain: apua.ag
+    organization: Antigua Public Utilities Authority
+    sector: Telecommunications
+  - domain: customs.gov.ag
+    organization: Customs and Excise Division
+    sector: Government
+  - domain: digicelantiguaandbarbuda.com
+    organization: Digicel Antigua and Barbuda
+    sector: Telecommunications
+  - domain: education.gov.ag
+    organization: Ministry of Education, Sports and Creative Industries
+    sector: Government
+  - domain: foreignaffairs.gov.ag
+    organization: Ministry of Foreign Affairs
+    sector: Government
+  - domain: gov.ag
+    organization: Government of Antigua and Barbuda
+    sector: Government
+  - domain: health.gov.ag
+    organization: Ministry of Health, Wellness and the Environment
+    sector: Government
+  - domain: uhsa.ag
+    organization: University of Health Sciences Antigua
+    sector: Education
+  - domain: visitantiguabarbuda.com
+    organization: Antigua and Barbuda Tourism Authority
+    sector: Government
+  - domain: flowantigua.com
+    organization: FLOW Antigua (Liberty Latin America)
+    sector: Telecommunications

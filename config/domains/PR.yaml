@@ -1,0 +1,50 @@
+# Puerto Rico — .pr and .gov portals; major telcos Claro, Liberty, and T-Mobile.
+domains:
+  - domain: aaa.pr.gov
+    organization: Autoridad de Acueductos y Alcantarillados
+    sector: Government
+  - domain: aeepr.com
+    organization: Autoridad de Energía Eléctrica de Puerto Rico
+    sector: Government
+  - domain: asg.pr.gov
+    organization: Administración de Servicios Generales
+    sector: Government
+  - domain: claropr.com
+    organization: Claro Puerto Rico
+    sector: Telecommunications
+  - domain: de.pr.gov
+    organization: Departamento de Educación de Puerto Rico
+    sector: Government
+  - domain: discoverpuertorico.com
+    organization: Discover Puerto Rico
+    sector: Government
+  - domain: dtop.pr.gov
+    organization: Departamento de Transportación y Obras Públicas
+    sector: Government
+  - domain: estado.pr.gov
+    organization: Departamento de Estado de Puerto Rico
+    sector: Government
+  - domain: hacienda.pr.gov
+    organization: Departamento de Hacienda de Puerto Rico
+    sector: Government
+  - domain: justicia.pr.gov
+    organization: Departamento de Justicia de Puerto Rico
+    sector: Government
+  - domain: libertypr.com
+    organization: Liberty Puerto Rico
+    sector: Telecommunications
+  - domain: ogp.pr.gov
+    organization: Oficina de Gerencia y Presupuesto
+    sector: Government
+  - domain: pr.gov
+    organization: Gobierno de Puerto Rico
+    sector: Government
+  - domain: prits.pr.gov
+    organization: Puerto Rico Innovation and Technology Service
+    sector: Government
+  - domain: tmobilepr.com
+    organization: T-Mobile Puerto Rico
+    sector: Telecommunications
+  - domain: upr.edu
+    organization: Universidad de Puerto Rico
+    sector: Education

@@ -1,0 +1,38 @@
+# British Virgin Islands
+domains:
+  - domain: bvi.gov.vg
+    organization: Government of the Virgin Islands
+    sector: Government
+  - domain: bvifsc.vg
+    organization: BVI Financial Services Commission
+    sector: Government
+  - domain: digicelbvi.com
+    organization: Digicel BVI
+    sector: Telecommunications
+  - domain: education.gov.vg
+    organization: Ministry of Education
+    sector: Government
+  - domain: flowbvi.com
+    organization: FLOW BVI
+    sector: Telecommunications
+  - domain: health.gov.vg
+    organization: Ministry of Health
+    sector: Government
+  - domain: bvitourism.com
+    organization: BVI Tourist Board
+    sector: Government
+  - domain: hlscc.edu.vg
+    organization: H. Lavity Stoutt Community College
+    sector: Education
+  - domain: telecom.gov.vg
+    organization: Telecommunications Regulatory Commission
+    sector: Government
+  - domain: customs.gov.vg
+    organization: Customs Department
+    sector: Government
+  - domain: statistics.gov.vg
+    organization: Central Statistics Office
+    sector: Government
+  - domain: cct.vg
+    organization: CCT / local ISP
+    sector: Telecommunications

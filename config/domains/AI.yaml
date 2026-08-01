@@ -1,0 +1,35 @@
+# Anguilla
+domains:
+  - domain: anguillafsc.com
+    organization: Anguilla Financial Services Commission
+    sector: Government
+  - domain: commerce.gov.ai
+    organization: Ministry of Economic Development, Investment, Commerce
+    sector: Government
+  - domain: digicelanguilla.com
+    organization: Digicel Anguilla
+    sector: Telecommunications
+  - domain: education.gov.ai
+    organization: Ministry of Education
+    sector: Government
+  - domain: gov.ai
+    organization: Government of Anguilla
+    sector: Government
+  - domain: health.gov.ai
+    organization: Ministry of Health and Social Development
+    sector: Government
+  - domain: ivisitanguilla.com
+    organization: Anguilla Tourist Board
+    sector: Government
+  - domain: statistics.gov.ai
+    organization: Anguilla Statistics Department
+    sector: Government
+  - domain: flow.ai
+    organization: FLOW Anguilla
+    sector: Telecommunications
+  - domain: alhadi.edu.ai
+    organization: Al Hadi School
+    sector: Education
+  - domain: asu.edu.ai
+    organization: Anguilla Community College / tertiary education
+    sector: Education

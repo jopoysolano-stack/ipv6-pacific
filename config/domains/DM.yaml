@@ -1,0 +1,38 @@
+# Dominica
+domains:
+  - domain: digiceldominica.com
+    organization: Digicel Dominica
+    sector: Telecommunications
+  - domain: dominica.gov.dm
+    organization: Government of the Commonwealth of Dominica
+    sector: Government
+  - domain: discoverdominica.com
+    organization: Discover Dominica Authority
+    sector: Government
+  - domain: education.gov.dm
+    organization: Ministry of Education
+    sector: Government
+  - domain: finance.gov.dm
+    organization: Ministry of Finance
+    sector: Government
+  - domain: flowdominica.com
+    organization: FLOW Dominica
+    sector: Telecommunications
+  - domain: health.gov.dm
+    organization: Ministry of Health, Wellness and Social Services
+    sector: Government
+  - domain: ict.gov.dm
+    organization: ICT Unit / Digital Dominica
+    sector: Government
+  - domain: news.gov.dm
+    organization: Government Information Service
+    sector: Government
+  - domain: statecollege.edu.dm
+    organization: Dominica State College
+    sector: Education
+  - domain: tourism.gov.dm
+    organization: Ministry of Tourism
+    sector: Government
+  - domain: uwi.edu
+    organization: The University of the West Indies (regional access)
+    sector: Education

@@ -1,0 +1,38 @@
+# Grenada
+domains:
+  - domain: digicelgrenada.com
+    organization: Digicel Grenada
+    sector: Telecommunications
+  - domain: education.gov.gd
+    organization: Ministry of Education
+    sector: Government
+  - domain: finance.gov.gd
+    organization: Ministry of Finance
+    sector: Government
+  - domain: flowgrenada.com
+    organization: FLOW Grenada
+    sector: Telecommunications
+  - domain: gov.gd
+    organization: Government of Grenada
+    sector: Government
+  - domain: health.gov.gd
+    organization: Ministry of Health
+    sector: Government
+  - domain: puregrenada.com
+    organization: Grenada Tourism Authority
+    sector: Government
+  - domain: spicisle.edu.gd
+    organization: T.A. Marryshow Community College
+    sector: Education
+  - domain: stgeorges.edu.gd
+    organization: St. George's University
+    sector: Education
+  - domain: telecom.gov.gd
+    organization: National Telecommunications Regulatory Commission
+    sector: Government
+  - domain: tourism.gov.gd
+    organization: Ministry of Tourism
+    sector: Government
+  - domain: trade.gov.gd
+    organization: Ministry of Trade
+    sector: Government

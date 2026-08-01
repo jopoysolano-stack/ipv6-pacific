@@ -1,0 +1,103 @@
+# Caribbean economies monitored (ISO 3166-1 alpha-2). Centroids [lon, lat] for map.
+# Phase 1 MVP domain lists: JM TT BB BS DO PR HT CU GY SR (see docs/config-and-domains.md).
+
+countries:
+  - iso2: AG
+    name: Antigua and Barbuda
+    centroid: [-61.8, 17.1]
+  - iso2: AI
+    name: Anguilla
+    centroid: [-63.1, 18.2]
+  - iso2: AW
+    name: Aruba
+    centroid: [-69.97, 12.5]
+  - iso2: BB
+    name: Barbados
+    centroid: [-59.55, 13.17]
+  - iso2: BL
+    name: Saint Barthélemy
+    centroid: [-62.85, 17.9]
+  - iso2: BM
+    name: Bermuda
+    centroid: [-64.75, 32.3]
+  - iso2: BQ
+    name: Caribbean Netherlands
+    centroid: [-68.26, 12.18]
+  - iso2: BS
+    name: Bahamas
+    centroid: [-77.4, 25.0]
+  - iso2: BZ
+    name: Belize
+    centroid: [-88.7, 17.2]
+  - iso2: CU
+    name: Cuba
+    centroid: [-79.5, 21.5]
+  - iso2: CW
+    name: Curaçao
+    centroid: [-68.99, 12.17]
+  - iso2: DM
+    name: Dominica
+    centroid: [-61.37, 15.42]
+  - iso2: DO
+    name: Dominican Republic
+    centroid: [-70.2, 18.7]
+  - iso2: GD
+    name: Grenada
+    centroid: [-61.68, 12.12]
+  - iso2: GF
+    name: French Guiana
+    centroid: [-53.0, 4.0]
+  - iso2: GP
+    name: Guadeloupe
+    centroid: [-61.55, 16.25]
+  - iso2: GY
+    name: Guyana
+    centroid: [-58.95, 5.0]
+  - iso2: HT
+    name: Haiti
+    centroid: [-72.3, 19.0]
+  - iso2: JM
+    name: Jamaica
+    centroid: [-77.3, 18.15]
+  - iso2: KN
+    name: Saint Kitts and Nevis
+    centroid: [-62.75, 17.35]
+  - iso2: KY
+    name: Cayman Islands
+    centroid: [-81.25, 19.3]
+  - iso2: LC
+    name: Saint Lucia
+    centroid: [-60.98, 13.91]
+  - iso2: MF
+    name: Saint Martin
+    centroid: [-63.05, 18.08]
+  - iso2: MQ
+    name: Martinique
+    centroid: [-61.02, 14.64]
+  - iso2: MS
+    name: Montserrat
+    centroid: [-62.19, 16.74]
+  - iso2: PR
+    name: Puerto Rico
+    centroid: [-66.5, 18.2]
+  - iso2: SR
+    name: Suriname
+    centroid: [-56.0, 4.0]
+  - iso2: SX
+    name: Sint Maarten
+    centroid: [-63.05, 18.04]
+  - iso2: TC
+    name: Turks and Caicos Islands
+    centroid: [-71.8, 21.75]
+  - iso2: TT
+    name: Trinidad and Tobago
+    centroid: [-61.25, 10.6]
+  - iso2: VC
+    name: Saint Vincent and the Grenadines
+    centroid: [-61.2, 13.25]
+  - iso2: VG
+    name: British Virgin Islands
+    centroid: [-64.62, 18.42]
+  - iso2: VI
+    name: U.S. Virgin Islands
+    centroid: [-64.8, 18.35]

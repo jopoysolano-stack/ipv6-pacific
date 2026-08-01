@@ -5,12 +5,33 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"sync"
 )
 
-const (
-	DefaultHost = "pacific.ipv6forum.com"
-	healthzPath = "/api/healthz"
+const healthzPath = "/api/healthz"
+
+var (
+	defaultHostMu sync.RWMutex
+	defaultHost   = "pacific.ipv6forum.com"
 )
+
+// SetDefaultHost sets the fallback dual-stack hostname when PUBLIC_SITE_URL is unset.
+func SetDefaultHost(host string) {
+	host = strings.TrimSpace(host)
+	if host == "" {
+		return
+	}
+	defaultHostMu.Lock()
+	defaultHost = host
+	defaultHostMu.Unlock()
+}
+
+// DefaultHostValue returns the current fallback host.
+func DefaultHostValue() string {
+	defaultHostMu.RLock()
+	defer defaultHostMu.RUnlock()
+	return defaultHost
+}
 
 // Config holds resolved probe healthz URLs for templates, embed bundles, and CSP.
 type Config struct {
@@ -20,7 +41,7 @@ type Config struct {
 }
 
 // Load reads PROBE_* from the environment. Unset values use defaults derived from
-// PUBLIC_SITE_URL or DefaultHost (https://ipv4.<host>, https://ipv6.<host>, https://<host>).
+// PUBLIC_SITE_URL or the region default host.
 func Load() Config {
 	host := SiteHost()
 	return Config{
@@ -35,7 +56,7 @@ func SiteHost() string {
 	if h := hostFromPublicSiteURL(os.Getenv("PUBLIC_SITE_URL")); h != "" {
 		return h
 	}
-	return DefaultHost
+	return DefaultHostValue()
 }
 
 // Origins returns unique scheme://host tokens for CSP connect-src.

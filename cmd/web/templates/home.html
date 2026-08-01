@@ -22,10 +22,14 @@
   </header>
 
   <main>
+    {{if .ShowEEZMap}}
     <section class="map-section">
-      <div id="eez-map-root" class="eez-map-wrap" role="img" aria-label="Exclusive economic zones in Oceania and the western Pacific. Click a monitored economy region to open its country page."></div>
+      <div id="eez-map-root" class="eez-map-wrap" role="img" aria-label="{{.MapAriaLabel}}"
+           data-eez-svg="/static/img/{{.EEZSVG}}"
+           data-title-iso="{{.TitleISOJSON}}"></div>
       <p class="notice">{{.EEZNotice}}</p>
     </section>
+    {{end}}
 
     <section class="economies-section">
       <h2>Economies</h2>

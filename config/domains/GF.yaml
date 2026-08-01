@@ -1,0 +1,38 @@
+# French Guiana
+domains:
+  - domain: ctguyane.fr
+    organization: Collectivité Territoriale de Guyane
+    sector: Government
+  - domain: guyane.gouv.fr
+    organization: Préfecture de la Guyane
+    sector: Government
+  - domain: guyane.university
+    organization: Université de Guyane
+    sector: Education
+  - domain: univ-guyane.fr
+    organization: Université de Guyane
+    sector: Education
+  - domain: orange.fr
+    organization: Orange Caraïbe / Orange Guyane
+    sector: Telecommunications
+  - domain: sfr.fr
+    organization: SFR (mobile/fixed in Guyane)
+    sector: Telecommunications
+  - domain: only.fr
+    organization: Only (local ISP / telecom brand)
+    sector: Telecommunications
+  - domain: ac-guyane.fr
+    organization: Académie de Guyane
+    sector: Education
+  - domain: guyane-amazonie.fr
+    organization: Tourisme Guyane
+    sector: Government
+  - domain: douane.gouv.fr
+    organization: Douanes françaises
+    sector: Government
+  - domain: insee.fr
+    organization: INSEE (statistics)
+    sector: Government
+  - domain: arcep.fr
+    organization: ARCEP (telecom regulator)
+    sector: Government

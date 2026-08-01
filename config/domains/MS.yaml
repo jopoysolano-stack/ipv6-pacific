@@ -1,0 +1,38 @@
+# Montserrat
+domains:
+  - domain: digicelmontserrat.com
+    organization: Digicel Montserrat
+    sector: Telecommunications
+  - domain: education.gov.ms
+    organization: Ministry of Education
+    sector: Government
+  - domain: flowmontserrat.com
+    organization: FLOW Montserrat
+    sector: Telecommunications
+  - domain: gov.ms
+    organization: Government of Montserrat
+    sector: Government
+  - domain: health.gov.ms
+    organization: Ministry of Health
+    sector: Government
+  - domain: visitmontserrat.com
+    organization: Montserrat Tourism Division
+    sector: Government
+  - domain: finance.gov.ms
+    organization: Ministry of Finance
+    sector: Government
+  - domain: customs.gov.ms
+    organization: Customs and Revenue Service
+    sector: Government
+  - domain: statistics.gov.ms
+    organization: Statistics Department
+    sector: Government
+  - domain: mcc.edu.ms
+    organization: Montserrat Community College
+    sector: Education
+  - domain: ntrc.ms
+    organization: National Telecommunications Regulatory Commission
+    sector: Government
+  - domain: emergency.gov.ms
+    organization: Disaster Management Coordination Agency
+    sector: Government

@@ -1,0 +1,51 @@
+# Guyana — CARICOM Secretariat headquarters in Georgetown.
+domains:
+  - domain: bankofguyana.org.gy
+    organization: Bank of Guyana
+    sector: Government
+  - domain: caricom.org
+    organization: Caribbean Community (CARICOM) Secretariat
+    sector: Regional
+    regional: true
+  - domain: digicelgy.com
+    organization: Digicel Guyana
+    sector: Telecommunications
+  - domain: dpi.gov.gy
+    organization: Department of Public Information
+    sector: Government
+  - domain: education.gov.gy
+    organization: Ministry of Education
+    sector: Government
+  - domain: finance.gov.gy
+    organization: Ministry of Finance
+    sector: Government
+  - domain: gtt.co.gy
+    organization: Guyana Telephone and Telegraph (GTT) / ONE Communications
+    sector: Telecommunications
+  - domain: health.gov.gy
+    organization: Ministry of Health
+    sector: Government
+  - domain: minfor.gov.gy
+    organization: Ministry of Foreign Affairs
+    sector: Government
+  - domain: moe.gov.gy
+    organization: Ministry of Education (legacy portal)
+    sector: Government
+  - domain: onecomm.gy
+    organization: ONE Communications Guyana
+    sector: Telecommunications
+  - domain: opm.gov.gy
+    organization: Office of the Prime Minister
+    sector: Government
+  - domain: parliament.gov.gy
+    organization: Parliament of Guyana
+    sector: Government
+  - domain: portal.gov.gy
+    organization: Government of Guyana portal
+    sector: Government
+  - domain: telecommunications.gov.gy
+    organization: Office of the Prime Minister — Telecommunications
+    sector: Government
+  - domain: uog.edu.gy
+    organization: University of Guyana
+    sector: Education

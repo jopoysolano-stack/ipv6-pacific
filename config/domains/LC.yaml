@@ -1,0 +1,39 @@
+# Saint Lucia — OECS Commission headquarters in Castries
+domains:
+  - domain: digicelstlucia.com
+    organization: Digicel St. Lucia
+    sector: Telecommunications
+  - domain: education.gov.lc
+    organization: Ministry of Education
+    sector: Government
+  - domain: flowstlucia.com
+    organization: FLOW St. Lucia
+    sector: Telecommunications
+  - domain: govt.lc
+    organization: Government of Saint Lucia
+    sector: Government
+  - domain: health.gov.lc
+    organization: Ministry of Health
+    sector: Government
+  - domain: investstlucia.com
+    organization: Invest Saint Lucia
+    sector: Government
+  - domain: oecs.int
+    organization: Organisation of Eastern Caribbean States Commission
+    sector: Regional
+    regional: true
+  - domain: salcc.edu.lc
+    organization: Sir Arthur Lewis Community College
+    sector: Education
+  - domain: stlucia.org
+    organization: Saint Lucia Tourism Authority
+    sector: Government
+  - domain: telecom.gov.lc
+    organization: National Telecommunications Regulatory Commission
+    sector: Government
+  - domain: uwi.edu
+    organization: The University of the West Indies (Open Campus / regional)
+    sector: Education
+  - domain: customs.gov.lc
+    organization: Customs and Excise Department
+    sector: Government

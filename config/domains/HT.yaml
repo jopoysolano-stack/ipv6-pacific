@@ -1,0 +1,47 @@
+# Haiti — French government domains (.gouv.ht).
+domains:
+  - domain: accesshaiti.com
+    organization: Access Haiti
+    sector: Telecommunications
+  - domain: conatel.gouv.ht
+    organization: Conseil National des Télécommunications (CONATEL)
+    sector: Government
+  - domain: digicelhaiti.com
+    organization: Digicel Haiti
+    sector: Telecommunications
+  - domain: hainet.ht
+    organization: Haïnet
+    sector: Telecommunications
+  - domain: ihsi.gouv.ht
+    organization: Institut Haïtien de Statistique et d'Informatique
+    sector: Government
+  - domain: mae.gouv.ht
+    organization: Ministère des Affaires Étrangères
+    sector: Government
+  - domain: mef.gouv.ht
+    organization: Ministère de l'Économie et des Finances
+    sector: Government
+  - domain: menfp.gouv.ht
+    organization: Ministère de l'Éducation Nationale et de la Formation Professionnelle
+    sector: Government
+  - domain: mjsac.gouv.ht
+    organization: Ministère de la Jeunesse, des Sports et de l'Action Civique
+    sector: Government
+  - domain: mspp.gouv.ht
+    organization: Ministère de la Santé Publique et de la Population
+    sector: Government
+  - domain: mtptc.gouv.ht
+    organization: Ministère des Travaux Publics, Transports et Communications
+    sector: Government
+  - domain: natcom.com.ht
+    organization: NATCOM S.A.
+    sector: Telecommunications
+  - domain: primature.gouv.ht
+    organization: Primature de la République d'Haïti
+    sector: Government
+  - domain: ueh.edu.ht
+    organization: Université d'État d'Haïti
+    sector: Education
+  - domain: undh.edu.ht
+    organization: Université Notre Dame d'Haïti
+    sector: Education

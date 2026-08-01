@@ -1,0 +1,44 @@
+# Trinidad and Tobago — CTU, CANTO, and ACS headquarters in Port of Spain.
+domains:
+  - domain: acs-aec.org
+    organization: Association of Caribbean States
+    sector: Regional
+    regional: true
+  - domain: bmobile.co.tt
+    organization: bmobile (TSTT)
+    sector: Telecommunications
+  - domain: canto.org
+    organization: CANTO (Caribbean Association of National Telecommunication Organizations)
+    sector: Regional
+    regional: true
+  - domain: central-bank.org.tt
+    organization: Central Bank of Trinidad and Tobago
+    sector: Government
+  - domain: ctu.int
+    organization: Caribbean Telecommunications Union
+    sector: Regional
+    regional: true
+  - domain: digiceltt.com
+    organization: Digicel Trinidad and Tobago
+    sector: Telecommunications
+  - domain: flowtrinidad.com
+    organization: FLOW Trinidad and Tobago
+    sector: Telecommunications
+  - domain: gov.tt
+    organization: Government of the Republic of Trinidad and Tobago
+    sector: Government
+  - domain: igovtt.tt
+    organization: National Information and Communication Technology Company (iGovTT)
+    sector: Government
+  - domain: sta.uwi.edu
+    organization: The University of the West Indies, St. Augustine Campus
+    sector: Education
+  - domain: tatt.org.tt
+    organization: Telecommunications Authority of Trinidad and Tobago
+    sector: Government
+  - domain: tstt.co.tt
+    organization: Telecommunications Services of Trinidad and Tobago
+    sector: Telecommunications
+  - domain: ttconnect.gov.tt
+    organization: ttconnect (Government service portal)
+    sector: Government

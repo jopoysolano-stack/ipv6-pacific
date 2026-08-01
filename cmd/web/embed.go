@@ -6,15 +6,16 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/pacific-monitor/pacific-monitor/internal/config"
 	"github.com/pacific-monitor/pacific-monitor/internal/httpserver"
 	"github.com/pacific-monitor/pacific-monitor/internal/ipv4outage"
 	"github.com/pacific-monitor/pacific-monitor/internal/siteurl"
 )
 
-func enrichOutagePage(bundle *connStatusBundle, publicSiteURL string) ipv4outage.PageEnricher {
+func enrichOutagePage(bundle *connStatusBundle, publicSiteURL string, region *config.RegionMeta) ipv4outage.PageEnricher {
 	siteURL := strings.TrimRight(strings.TrimSpace(publicSiteURL), "/")
 	if siteURL == "" {
-		siteURL = "https://pacific.ipv6forum.com"
+		siteURL = "https://" + region.DefaultHost
 	}
 	return func(r *http.Request, data *ipv4outage.PageData) {
 		data.Nonce = httpserver.CSPNonce(r)
@@ -25,7 +26,7 @@ func enrichOutagePage(bundle *connStatusBundle, publicSiteURL string) ipv4outage
 	}
 }
 
-func serveEmbedConnStatus(tmpl *template.Template, bundle *connStatusBundle, w http.ResponseWriter, r *http.Request, siteURL string) {
+func serveEmbedConnStatus(tmpl *template.Template, bundle *connStatusBundle, w http.ResponseWriter, r *http.Request, siteURL string, region *config.RegionMeta) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	siteURL = strings.TrimRight(strings.TrimSpace(siteURL), "/")
 	if siteURL == "" {
@@ -38,11 +39,12 @@ func serveEmbedConnStatus(tmpl *template.Template, bundle *connStatusBundle, w h
 		"Nonce":             httpserver.CSPNonce(r),
 		"ConnStatusVariant": "embed",
 		"SiteURL":           siteURL,
+		"SiteName":          region.SiteName,
 	}
 	_ = tmpl.ExecuteTemplate(w, "embed_conn_status.html", data)
 }
 
-func serveEmbedConnStatusDetails(tmpl *template.Template, bundle *connStatusBundle, w http.ResponseWriter, r *http.Request, siteURL string) {
+func serveEmbedConnStatusDetails(tmpl *template.Template, bundle *connStatusBundle, w http.ResponseWriter, r *http.Request, siteURL string, region *config.RegionMeta) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	siteURL = strings.TrimRight(strings.TrimSpace(siteURL), "/")
 	if siteURL == "" {
@@ -54,6 +56,7 @@ func serveEmbedConnStatusDetails(tmpl *template.Template, bundle *connStatusBund
 		"InlineDetailsJS": template.JS(bundle.inlineDetailsJS),
 		"Nonce":           httpserver.CSPNonce(r),
 		"SiteURL":         siteURL,
+		"SiteName":        region.SiteName,
 	}
 	_ = tmpl.ExecuteTemplate(w, "embed_conn_status_details.html", data)
 }
@@ -64,7 +67,7 @@ func serveEmbedScript(w http.ResponseWriter, bundle *connStatusBundle) {
 	_, _ = w.Write(bundle.embedScript)
 }
 
-func embedPage(tmpl *template.Template, w http.ResponseWriter, r *http.Request) {
+func embedPage(tmpl *template.Template, w http.ResponseWriter, r *http.Request, region *config.RegionMeta) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	borderClass := "border--ipv4"
 	if httpserver.IsIPv6Client(r) {
@@ -85,22 +88,23 @@ func embedPage(tmpl *template.Template, w http.ResponseWriter, r *http.Request) 
 
 	scriptCSPOrigins := []string{origin}
 
-	pageTitle := "Embed — Pacific Islands IPv6 Monitor"
-	metaDesc := "Embed the Pacific Islands IPv6 Monitor connection-status widget on your site — iframe or script tag."
+	pageTitle := "Embed — " + region.SiteName
+	metaDesc := fmt.Sprintf("Embed the %s connection-status widget on your site — iframe or script tag.", region.SiteName)
 	data := map[string]any{
-		"Title":              pageTitle,
-		"BorderClass":        borderClass,
-		"FooterVariant":      "about",
-		"ProbeV4":            probeV4,
-		"ProbeV6":            probeV6,
-		"ProbeDS":            probeDS,
-		"ShowDualProbe":      probeV4 != "" && probeV6 != "",
-		"Nonce":              httpserver.CSPNonce(r),
+		"Title":             pageTitle,
+		"SiteName":          region.SiteName,
+		"BorderClass":       borderClass,
+		"FooterVariant":     "about",
+		"ProbeV4":           probeV4,
+		"ProbeV6":           probeV6,
+		"ProbeDS":           probeDS,
+		"ShowDualProbe":     probeV4 != "" && probeV6 != "",
+		"Nonce":             httpserver.CSPNonce(r),
 		"IframeSnippet":     iframeSnippet,
 		"ScriptSnippet":     scriptSnippet,
-		"CSPScriptOrigins": scriptCSPOrigins,
+		"ScriptCSPOrigins":  scriptCSPOrigins,
 	}
-	seoMerge(r, data, pageTitle, metaDesc)
+	seoMerge(r, data, pageTitle, metaDesc, region.SiteName)
 	mergeOutagePageData(data)
 	_ = tmpl.ExecuteTemplate(w, "embed.html", data)
 }

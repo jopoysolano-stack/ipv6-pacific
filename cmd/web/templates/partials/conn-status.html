@@ -46,7 +46,7 @@
     </button>
   </div>
   <p class="conn-status-attribution" hidden>
-    <a href="{{.SiteURL}}/">Pacific Islands IPv6 Monitor</a>
+    <a href="{{.SiteURL}}/">{{if .SiteName}}{{.SiteName}}{{else}}IPv6 Monitor{{end}}</a>
   </p>
   <dialog class="conn-status-dialog" aria-labelledby="conn-status-dialog-title">
     <div class="conn-status-dialog__inner">

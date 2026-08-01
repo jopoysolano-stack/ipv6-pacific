@@ -11,6 +11,7 @@ func TestLoad_defaults(t *testing.T) {
 	for _, k := range []string{"PROBE_V4_URL", "PROBE_V6_URL", "PROBE_DS_URL", "PUBLIC_SITE_URL"} {
 		_ = os.Unsetenv(k)
 	}
+	probeurls.SetDefaultHost("pacific.ipv6forum.com")
 	cfg := probeurls.Load()
 	if cfg.V4 != "https://ipv4.pacific.ipv6forum.com/api/healthz" {
 		t.Fatalf("V4=%q", cfg.V4)

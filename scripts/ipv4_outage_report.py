@@ -28,7 +28,7 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import DefaultDict, Iterable, Iterator, Optional, Set, Tuple
 
-DEFAULT_SERVICE = "ipv6-pacific-web"
+DEFAULT_SERVICE = "ipv6-web@pacific"
 DEFAULT_MAIN_HOST = "pacific.ipv6forum.com"
 NGINX_DIR = Path("/var/log/nginx")
 

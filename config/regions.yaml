@@ -1,0 +1,26 @@
+# Region registry: REGION env must match an id below.
+# Adding a region: append here, then add {id}_iso2.yaml, domains, EEZ assets, about template, .env.{id}.
+
+regions:
+  - id: pacific
+    site_name: Pacific Islands IPv6 Monitor
+    default_host: pacific.ipv6forum.com
+    ripestat_sourceapp: pacific-ipv6-monitor
+    eez_svg: EEZ_Pacific.svg
+    eez_notice: "EEZ overview map: Wikimedia Commons — File:EEZ_Oceania.svg (author STyx, public domain; local file EEZ_Pacific.svg). Source: https://commons.wikimedia.org/wiki/File:EEZ_Oceania.svg"
+    about_template: about_pacific.html
+    map_aria_label: Exclusive economic zones in Oceania and the western Pacific. Click a monitored economy region to open its country page.
+    meta_description: Pacific Islands IPv6 Monitor — IPv6 deployment estimates for Pacific economies from DNS, mail, and web checks plus APNIC Labs capability data.
+    about_meta_description: Pacific Islands IPv6 Council and this deployment monitor — IPv6 roadmap for the Pacific, measurements, and council leadership.
+    dev_listen: ":8082"
+  - id: caribbean
+    site_name: Caribbean IPv6 Monitor
+    default_host: caribbean.ipv6forum.com
+    ripestat_sourceapp: caribbean-ipv6-monitor
+    eez_svg: EEZ_Caribbean.svg
+    eez_notice: "EEZ overview map derived from Wikimedia Commons territorial-waters artwork (STyx, public domain); local file EEZ_Caribbean.svg."
+    about_template: about_caribbean.html
+    map_aria_label: Exclusive economic zones in the Caribbean. Click a monitored economy region to open its country page.
+    meta_description: Caribbean IPv6 Monitor — IPv6 deployment estimates for Caribbean economies from DNS, mail, and web checks plus APNIC Labs capability data.
+    about_meta_description: Caribbean IPv6 deployment monitor — measurements for Caribbean economies and IPv6 Forum chapter goals.
+    dev_listen: ":8083"
