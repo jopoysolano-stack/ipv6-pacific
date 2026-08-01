@@ -19,7 +19,7 @@ cp .env.pacific.example .env.pacific   # optional; start scripts source .env.{re
 ./scripts/gen_dev_certs.sh
 ```
 
-This writes **`certs/cert.pem`** and **`certs/key.pem`** (gitignored). Then:
+This writes self-signed **localhost** pairs under **`certs/pacific/`** and **`certs/caribbean/`** (gitignored). Region env files set **`TLS_CERT_FILE`** / **`TLS_KEY_FILE`** to those paths — see **`certs/README.md`**. Then:
 
 ### Run web UI
 
@@ -117,7 +117,7 @@ See `scripts/push_to_prod.sh`. Set `PROD_DEST` to your `user@host:/path`. It bui
 | `.env` / `.env.local` (godotenv) | Optional shared non-region defaults only (timeouts, TLS paths) — or omit on prod |
 | Local start scripts | Source `.env.{id}` when present, then set `REGION` / `DATA_DIR` / `LISTEN` |
 
-**`pacific-web` and `pacific-collector` load `.env` / `.env.local` from the executable directory then cwd**; godotenv does **not** overwrite names already set. Prefer **`WorkingDirectory=/opt/ipv6-pacific`**. Do not put `DATA_DIR`, `LISTEN`, `PUBLIC_SITE_URL`, `PROBE_*`, or `REGION` in a shared `.env` used by multiple instances.
+**`pacific-web` and `pacific-collector` load `.env` / `.env.local` from the executable directory then cwd**; godotenv does **not** overwrite names already set. Prefer **`WorkingDirectory=/opt/ipv6-pacific`**. Do not put `DATA_DIR`, `LISTEN`, `PUBLIC_SITE_URL`, `PROBE_*`, `TLS_CERT_FILE`, `TLS_KEY_FILE`, or `REGION` in a shared `.env` used by multiple instances.
 
 **DATA_DIR migration:** legacy `./data/countries` + `index.json` belong under `./data/pacific/`. Caribbean uses `./data/caribbean/`.
 

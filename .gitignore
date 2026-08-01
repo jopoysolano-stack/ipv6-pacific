@@ -8,6 +8,9 @@ __pycache__/
 !.env.example
 !.env.*.example
 # TLS material — never commit
+certs/**/*.pem
+certs/**/*.key
+certs/**/*.crt
 certs/*.pem
 certs/*.key
 certs/*.crt

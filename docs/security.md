@@ -51,13 +51,24 @@ CI runs `go vet ./...` and `go test ./...`. Periodically run **`govulncheck ./..
 
 Terminate TLS at the reverse proxy and forward **`X-Forwarded-For`** (and related headers) so rate limiting and client IP detection in `internal/httpserver` see the real client. The Go app also emits security headers; **avoid duplicating the same header in nginx and in Go** — pick one layer for CSP in particular.
 
+### Per-region certificates
+
+Pacific and Caribbean are separate public hostnames. Use **separate certificate files** (recommended) under e.g. **`/opt/ipv6-pacific/certs/pacific/`** and **`…/caribbean/`**, each covering that region’s apex plus **`ipv4.`** / **`ipv6.`** probe names. A single multi-SAN cert is possible but couples renewal. Do not point Caribbean nginx (or `TLS_*`) at a Pacific-only leaf.
+
+| Role | Env / nginx | Notes |
+|------|-------------|--------|
+| Public edge | nginx `ssl_certificate*` | Per-region LE (or other) material |
+| Go listener | `TLS_CERT_FILE` / `TLS_KEY_FILE` in `.env.{region}` | May be localhost-only upstream certs, or the same public files if TLS terminates on Go |
+
+Layout and local generation: **`certs/README.md`**. Examples: **`.env.pacific.example`**, **`.env.caribbean.example`**.
+
 ### Example production site (`caribbean.ipv6forum.com`)
 
-Duplicate the Pacific nginx pattern: proxy to **`https://localhost:8083`**, `server_name` caribbean (+ `ipv4.` / `ipv6.` probe hosts), TLS certs/SANs for those names, and Permissions-Policy / embed rules pointed at the Caribbean origin. Use `.env.caribbean` with `LISTEN=:8083` and matching `PROBE_*` URLs.
+Duplicate the Pacific nginx pattern: proxy to the Caribbean Go **`LISTEN`** (prod often a different port than Pacific), `server_name` caribbean (+ `ipv4.` / `ipv6.` probe hosts), **`ssl_certificate`** / **`ssl_certificate_key`** under **`certs/caribbean/`** (SANs for those names), and Permissions-Policy / embed rules pointed at the Caribbean origin. Use `.env.caribbean` with matching `LISTEN`, `TLS_*`, and `PROBE_*` URLs.
 
 ### Example production site (`pacific.ipv6forum.com`)
 
-Deployed as **`/etc/nginx/conf.d/ipv6-pacific.conf`** on `bookerpal-main`: HTTP redirects to HTTPS; HTTPS proxies to **`pacific-web`** on **`https://localhost:8082`** (the binary uses TLS; nginx must trust or verify that upstream as configured). Public TLS certificates live under **`/opt/ipv6-pacific/certs/`** (`fullchain.pem`, `key.pem`). Adjust paths, hostnames, and cipher lists for your environment.
+Deployed as **`/etc/nginx/conf.d/ipv6-pacific.conf`** on `bookerpal-main`: HTTP redirects to HTTPS; HTTPS proxies to **`pacific-web`** on **`https://localhost:8082`** (the binary uses TLS; nginx must trust or verify that upstream as configured). Public TLS certificates live under **`/opt/ipv6-pacific/certs/pacific/`** (`fullchain.pem`, `key.pem`). Adjust paths, hostnames, and cipher lists for your environment.
 
 ```nginx
 # Redirect HTTP pacific.ipv6forum.com to HTTPS
@@ -75,8 +86,8 @@ server {
     http2 on;
 
     # SSL Configuration
-    ssl_certificate /opt/ipv6-pacific/certs/fullchain.pem;
-    ssl_certificate_key /opt/ipv6-pacific/certs/key.pem;
+    ssl_certificate /opt/ipv6-pacific/certs/pacific/fullchain.pem;
+    ssl_certificate_key /opt/ipv6-pacific/certs/pacific/key.pem;
 
     # SSL Security
     ssl_protocols TLSv1.2 TLSv1.3;
