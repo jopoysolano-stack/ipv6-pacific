@@ -30,3 +30,5 @@ cp .env.caribbean.example .env.caribbean
 Then open **`https://127.0.0.1:8082/`** (Pacific) or **`:8083`** (Caribbean).
 
 **Documentation:** start at **[docs/index.md](docs/index.md)** — regions and domains: **[docs/config-and-domains.md](docs/config-and-domains.md)**.
+
+**License:** [Apache License 2.0](LICENSE) — Copyright 2026 PeachyMango LLC. See [CONTRIBUTING.md](CONTRIBUTING.md).
