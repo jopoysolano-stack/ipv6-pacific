@@ -1,38 +1,32 @@
-# Curaçao
+# Curaçao — Digicel consumer site often uses digicelgroup.com/cw paths.
 domains:
-  - domain: gobiernu.cw
-    organization: Government of Curaçao
-    sector: Government
-  - domain: government.cw
-    organization: Government of Curaçao (English)
-    sector: Government
-  - domain: curacao.com
-    organization: Curaçao Tourist Board
-    sector: Government
-  - domain: uts.cw
-    organization: United Telecommunication Services (UTS)
-    sector: Telecommunications
-  - domain: digicelcuracao.com
-    organization: Digicel Curaçao
-    sector: Telecommunications
-  - domain: flowcuracao.com
-    organization: FLOW Curaçao
-    sector: Telecommunications
-  - domain: uoc.cw
-    organization: University of Curaçao
-    sector: Education
-  - domain: una.cw
-    organization: University of the Netherlands Antilles legacy / education
-    sector: Education
-  - domain: cbs.cw
-    organization: Central Bureau of Statistics Curaçao
-    sector: Government
-  - domain: douane.cw
-    organization: Customs Curaçao
+  - domain: btnp.org
+    organization: Bureau Telecommunicatie en Post
     sector: Government
   - domain: centralbank.cw
     organization: Centrale Bank van Curaçao en Sint Maarten
     sector: Government
-  - domain: btv.cw
-    organization: Bureau Telecommunicatie en Post
+  - domain: curacao.com
+    organization: Curaçao Tourist Board (visitor portal)
     sector: Government
+  - domain: curacaotouristboard.com
+    organization: Curaçao Tourist Board
+    sector: Government
+  - domain: gob.cw
+    organization: Government of Curaçao (gob.cw portal)
+    sector: Government
+  - domain: gobiernu.cw
+    organization: Gobièrnu di Kòrsou
+    sector: Government
+  - domain: rac.cw
+    organization: Regulatory Authority of Curaçao
+    sector: Government
+  - domain: soab.cw
+    organization: Stichting Overheidsaccountantsbureau (SOAB)
+    sector: Government
+  - domain: uoc.cw
+    organization: University of Curaçao / .cw Registry
+    sector: Education
+  - domain: uts.cw
+    organization: UTS / FLOW Curaçao (Chippie)
+    sector: Telecommunications

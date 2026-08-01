@@ -1,38 +1,32 @@
-# Aruba
+# Aruba — Digicel consumer site often uses digicelgroup.com/aw paths.
 domains:
+  - domain: airportaruba.com
+    organization: Aruba Airport Authority (Reina Beatrix)
+    sector: Government
   - domain: aruba.com
     organization: Aruba Tourism Authority
     sector: Government
+  - domain: cbaruba.org
+    organization: Centrale Bank van Aruba
+    sector: Government
+  - domain: douane.aw
+    organization: Departamento di Aduana (Customs)
+    sector: Government
+  - domain: ea.aw
+    organization: Departamento di Enseñansa Aruba
+    sector: Education
+  - domain: epiaruba.com
+    organization: Colegio EPI (Educacion Profesional Intermedio)
+    sector: Education
   - domain: gobierno.aw
-    organization: Government of Aruba
+    organization: Gobierno di Aruba
     sector: Government
   - domain: overheid.aw
-    organization: Government of Aruba (Dutch portal)
+    organization: Overheid Aruba (government portal)
     sector: Government
   - domain: setar.aw
-    organization: SETAR N.V. (telecom)
-    sector: Telecommunications
-  - domain: digicelaruba.com
-    organization: Digicel Aruba
+    organization: SETAR N.V.
     sector: Telecommunications
   - domain: ua.aw
     organization: University of Aruba
     sector: Education
-  - domain: colegiopascal.edu.aw
-    organization: Colegio Pascal
-    sector: Education
-  - domain: douane.aw
-    organization: Customs Aruba
-    sector: Government
-  - domain: belastingdienst.aw
-    organization: Tax Department Aruba
-    sector: Government
-  - domain: cbs.aw
-    organization: Central Bureau of Statistics Aruba
-    sector: Government
-  - domain: mirant.aw
-    organization: WEB Aruba / utilities information
-    sector: Government
-  - domain: airportaruba.com
-    organization: Aruba Airport Authority
-    sector: Government

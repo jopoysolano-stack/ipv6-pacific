@@ -1,38 +1,32 @@
-# Caribbean Netherlands (Bonaire, Sint Eustatius, Saba)
+# Caribbean Netherlands (Bonaire, Sint Eustatius, Saba) — Digicel often uses digicelgroup.com/bq paths.
 domains:
-  - domain: rijksdienstcn.com
-    organization: Rijksdienst Caribisch Nederland
-    sector: Government
   - domain: bonairegov.com
     organization: Openbaar Lichaam Bonaire
     sector: Government
-  - domain: statiagovernment.com
-    organization: Openbaar Lichaam Sint Eustatius
+  - domain: eutelnv.com
+    organization: Eutel N.V. (Sint Eustatius Telecommunications)
+    sector: Telecommunications
+  - domain: flamingotv.com
+    organization: Flamingo TV Bonaire
+    sector: Telecommunications
+  - domain: rijksdienstcn.com
+    organization: Rijksdienst Caribisch Nederland
     sector: Government
   - domain: sabagov.nl
     organization: Openbaar Lichaam Saba
     sector: Government
-  - domain: tourismbonaire.com
-    organization: Tourism Corporation Bonaire
-    sector: Government
-  - domain: telbo.net
-    organization: Telbo N.V. (Bonaire telecom)
+  - domain: satelnv.com
+    organization: Satel N.V. (Saba Telephone Company)
     sector: Telecommunications
-  - domain: flogbonaire.com
-    organization: FLOW / Liberty Caribbean Bonaire
-    sector: Telecommunications
-  - domain: digicelbonaire.com
-    organization: Digicel Bonaire
-    sector: Telecommunications
-  - domain: eutech.edu.bq
-    organization: University of Applied Sciences / tertiary Bonaire
-    sector: Education
-  - domain: scholengemeenschapbonaire.com
+  - domain: sgbonaire.com
     organization: Scholengemeenschap Bonaire
     sector: Education
-  - domain: cbs.nl
-    organization: Statistics Netherlands (CN data)
+  - domain: statiagovernment.com
+    organization: Openbaar Lichaam Sint Eustatius
     sector: Government
-  - domain: knmi.nl
-    organization: KNMI (weather services for CN)
+  - domain: telbo.net
+    organization: TELBO N.V. (Telefonia Bonairiano)
+    sector: Telecommunications
+  - domain: tourismbonaire.com
+    organization: Tourism Corporation Bonaire
     sector: Government

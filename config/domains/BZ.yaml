@@ -1,41 +1,38 @@
 # Belize
 domains:
-  - domain: belize.gov.bz
-    organization: Government of Belize
-    sector: Government
-  - domain: pressoffice.gov.bz
-    organization: Government Press Office
-    sector: Government
-  - domain: tourism.gov.bz
-    organization: Ministry of Tourism
-    sector: Government
-  - domain: travelbelize.org
+  - domain: belizetourismboard.org
     organization: Belize Tourism Board
     sector: Government
-  - domain: education.gov.bz
-    organization: Ministry of Education, Culture, Science and Technology
-    sector: Government
-  - domain: health.gov.bz
-    organization: Ministry of Health and Wellness
-    sector: Government
-  - domain: belizetelemedia.net
-    organization: Belize Telemedia Limited (BTL / Digi)
-    sector: Telecommunications
-  - domain: smart.com.bz
-    organization: Smart! (Speednet)
-    sector: Telecommunications
-  - domain: digicelbelize.com
-    organization: Digicel Belize
-    sector: Telecommunications
-  - domain: ub.edu.bz
-    organization: University of Belize
-    sector: Education
-  - domain: galen.edu.bz
-    organization: Galen University
-    sector: Education
   - domain: centralbank.org.bz
     organization: Central Bank of Belize
     sector: Government
-  - domain: puc.bz
-    organization: Public Utilities Commission
+  - domain: egov.gov.bz
+    organization: Ministry of E-Governance
     sector: Government
+  - domain: immigration.gov.bz
+    organization: Department of Immigration
+    sector: Government
+  - domain: livedigi.com
+    organization: Belize Telemedia Limited (Digi)
+    sector: Telecommunications
+  - domain: moecst.gov.bz
+    organization: Ministry of Education, Culture, Science and Technology
+    sector: Education
+  - domain: mpuele.gov.bz
+    organization: Ministry of Public Utilities, Energy, Logistics & E-Governance
+    sector: Government
+  - domain: pressoffice.gov.bz
+    organization: Government of Belize Press Office
+    sector: Government
+  - domain: puc.bz
+    organization: Public Utilities Commission of Belize
+    sector: Government
+  - domain: smart-bz.com
+    organization: Smart (Speednet Communications)
+    sector: Telecommunications
+  - domain: travelbelize.org
+    organization: Belize Tourism Board (visitor portal)
+    sector: Government
+  - domain: ub.edu.bz
+    organization: University of Belize
+    sector: Education

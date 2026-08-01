@@ -1,35 +1,32 @@
-# Saint Barthélemy (French overseas collectivity; many official sites use .fr)
+# Saint Barthélemy — uses .fr / collectivité domains; Digicel often uses digicelgroup.com paths.
 domains:
+  - domain: ac-guadeloupe.fr
+    organization: Académie de Guadeloupe (covers Saint-Barthélemy schools)
+    sector: Education
   - domain: comstbarth.fr
     organization: Collectivité de Saint-Barthélemy
-    sector: Government
-  - domain: st-barth.com
-    organization: Saint-Barthélemy Tourism Committee
-    sector: Government
-  - domain: pref.st-barthelemy.gouv.fr
-    organization: Préfecture de Saint-Barthélemy et Saint-Martin
-    sector: Government
-  - domain: saint-barth.gouv.fr
-    organization: State services Saint-Barthélemy
     sector: Government
   - domain: dauphintelecom.com
     organization: Dauphin Telecom
     sector: Telecommunications
-  - domain: orange.fr
-    organization: Orange (mobile/fixed serving Saint-Barthélemy)
-    sector: Telecommunications
-  - domain: srmnet.com
-    organization: SRM / local ISP services
-    sector: Telecommunications
-  - domain: lycee-st-barthelemy.fr
-    organization: Lycée de Saint-Barthélemy
+  - domain: mireillechoisy.clg.ac-guadeloupe.fr
+    organization: Collège Mireille Choisy
     sector: Education
-  - domain: ac-guadeloupe.fr
-    organization: Académie de Guadeloupe (education authority)
+  - domain: saint-barth-saint-martin.gouv.fr
+    organization: Préfecture de Saint-Barthélemy et Saint-Martin
+    sector: Government
+  - domain: saintbarth-tourisme.com
+    organization: Office du Tourisme de Saint-Barthélemy
+    sector: Government
+  - domain: saintbarthtelecom.fr
+    organization: Saint-Barth Telecom
+    sector: Telecommunications
+  - domain: seidn.ac-guadeloupe.fr
+    organization: Service de l'Éducation des Îles du Nord
     sector: Education
   - domain: st-barths.com
-    organization: Saint-Barth tourism / destination information
+    organization: Saint-Barthélemy destination portal
     sector: Government
-  - domain: sbh-airport.com
-    organization: Saint-Barthélemy Airport
-    sector: Government
+  - domain: stbarthdigital.fr
+    organization: St-Barth Digital (Collectivité FTTH programme)
+    sector: Telecommunications
