@@ -14,16 +14,13 @@
     console.error('eez title map JSON parse failed', e);
   }
 
+  // EEZ paths carry a <title>; land outlines often only have an id — ignore id so we color EEZ only.
   function territoryLabel(pathEl) {
     var tEl = pathEl.querySelector('title');
-    if (tEl) {
-      var t = tEl.textContent.replace(/\s+/g, ' ').trim();
-      if (t) {
-        return t;
-      }
+    if (!tEl) {
+      return '';
     }
-    var id = (pathEl.getAttribute('id') || '').replace(/\s+/g, ' ').trim();
-    return id || '';
+    return tEl.textContent.replace(/\s+/g, ' ').trim();
   }
 
   function buildPreferredByISO(indexPayload) {

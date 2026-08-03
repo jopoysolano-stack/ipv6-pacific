@@ -156,10 +156,7 @@ func childTextTitle(path *etree.Element) string {
 	return ""
 }
 
-// territoryLabel mirrors map-home.js: prefer <title> text, else path id.
+// territoryLabel mirrors map-home.js: EEZ paths use <title> only (ignore path id / land outlines).
 func territoryLabel(path *etree.Element) string {
-	if t := childTextTitle(path); t != "" {
-		return t
-	}
-	return normalizeTitle(path.SelectAttrValue("id", ""))
+	return childTextTitle(path)
 }
