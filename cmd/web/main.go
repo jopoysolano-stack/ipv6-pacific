@@ -33,7 +33,7 @@ import (
 //go:embed templates/*.html templates/partials/*.html
 var templateFS embed.FS
 
-//go:embed static/css static/js static/img static/favicon.svg static/favicon-16px.ico static/favicon-32px.ico static/favicon-48px.ico static/robots.txt static/well-known/pki-validation/starfield.html
+//go:embed static/css static/js static/img static/favicon.svg static/favicon-16px.ico static/favicon-32px.ico static/favicon-48px.ico static/robots.txt static/well-known/pki-validation
 var staticFS embed.FS
 
 func main() {
@@ -125,6 +125,9 @@ func main() {
 	// Use explicit GET for static assets so Go 1.22+ ServeMux does not conflict with "GET /".
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.FS(static))))
 	mux.Handle("GET /.well-known/", http.StripPrefix("/.well-known/", http.FileServer(http.FS(wellKnown))))
+	mux.HandleFunc("GET /.well-known/pki-validation/starfield.html", func(w http.ResponseWriter, r *http.Request) {
+		serveStarfieldValidation(w, r, region.ID)
+	})
 	mux.HandleFunc("GET /favicon.ico", serveRootFaviconICO)
 	mux.HandleFunc("GET /robots.txt", serveRobotsTxt)
 	mux.HandleFunc("GET /sitemap.xml", func(w http.ResponseWriter, r *http.Request) {
@@ -260,6 +263,20 @@ func serveRootFaviconICO(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "image/vnd.microsoft.icon")
+	_, _ = w.Write(data)
+}
+
+// serveStarfieldValidation serves GoDaddy/Starfield domain validation at a fixed URL,
+// selecting the token file for the active REGION.
+func serveStarfieldValidation(w http.ResponseWriter, r *http.Request, regionID string) {
+	path := "static/well-known/pki-validation/starfield_" + regionID + ".html"
+	data, err := staticFS.ReadFile(path)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-store")
 	_, _ = w.Write(data)
 }
 
