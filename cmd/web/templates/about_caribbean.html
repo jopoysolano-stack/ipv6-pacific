@@ -27,6 +27,12 @@
       <p>This monitor publishes IPv6 deployment-oriented measurements (DNS, mail, web, DNSSEC, and APNIC Labs–style capability signals) for Caribbean economies. They are estimates from measurement, not a compliance certification. On the EEZ map’s <strong>IPv6 pref. %</strong> view, gray cells mean APNIC Labs preferred-% data is not available for that economy.</p>
     </section>
 
+    <section class="country-detail-section" aria-labelledby="about-operator">
+      <h2 id="about-operator">Who runs this site</h2>
+      <p>This monitoring site is operated by
+        <a href="https://www.peachymango.org/" target="_blank" rel="noopener">PeachyMango LLC</a>.</p>
+    </section>
+
     <section class="country-detail-section" aria-labelledby="about-forum">
       <h2 id="about-forum">IPv6 Forum</h2>
       <p>The site supports the broader goals of the <a href="https://www.ipv6forum.com/" target="_blank" rel="noopener">IPv6 Forum</a> to advance IPv6 deployment. Caribbean-specific council narrative can be expanded here as the regional chapter evolves.</p>
@@ -50,9 +56,9 @@
 
   <script src="/static/js/pct-color-ramp.js"></script>
   <script nonce="{{.Nonce}}">
-    window.__PROBE_V4__ = {{if .ProbeV4}}"{{.ProbeV4}}"{{else}}""{{end}};
-    window.__PROBE_V6__ = {{if .ProbeV6}}"{{.ProbeV6}}"{{else}}""{{end}};
-    window.__PROBE_DS__ = {{if .ProbeDS}}"{{.ProbeDS}}"{{else}}""{{end}};
+    window.__PROBE_V4__ = "{{.ProbeV4}}";
+    window.__PROBE_V6__ = "{{.ProbeV6}}";
+    window.__PROBE_DS__ = "{{.ProbeDS}}";
   </script>
   <script src="/static/js/conn-status-probe.js"></script>
   <script src="/static/js/conn-status-ui.js"></script>
