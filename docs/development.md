@@ -187,7 +187,7 @@ For **privacy and trust** assumptions when showing addresses in the UI, see **`d
 
 ## Monthly 6/6 IPv4 outage
 
-On **UTC calendar day 6** of each month (00:00:00–23:59:59 UTC), the **main dual-stack hostname** (`pacific.ipv6forum.com`, or the host from **`PUBLIC_SITE_URL`** / **`IPV4_OUTAGE_HOST`**) returns HTTP **503 Service Unavailable** with **`Retry-Over-IPv6: ?1`** to **IPv4** clients for idempotent requests (`GET`, `HEAD`, `OPTIONS`). IPv6 clients receive normal responses. Signaling follows [draft-martin-retry-over-ipv6](https://github.com/franckhlmartin/ietf-draft-retry-over-ipv6/blob/main/draft-martin-retry-over-ipv6.md) (`Retry-Over-IPv6`, `IPv4-Unavailable-Until`, optional `Retry-Over-IPv6-Token`, and RFC 9457 Problem Details with `urn:ietf:params:problem:ipv4-unavailable` for `/api/*`).
+On **UTC calendar day 6** of each month (00:00:00–23:59:59 UTC), the **main dual-stack hostname** (`pacific.ipv6forum.com` / `caribbean.ipv6forum.com`, or the host from **`PUBLIC_SITE_URL`** / **`IPV4_OUTAGE_HOST`**) returns HTTP **503 Service Unavailable** with **`Retry-Over-IPv6: ?1`** to **IPv4** clients for idempotent requests (`GET`, `HEAD`, `OPTIONS`). IPv6 clients receive normal responses. Signaling follows the v6ops Internet-Draft [HTTP Signaling of Planned IPv4 Unavailability](https://github.com/franckhlmartin/ietf-draft-retry-over-ipv6) (`Retry-Over-IPv6`, `IPv4-Unavailable-Until`, optional `Retry-Over-IPv6-Token`, and RFC 9457 Problem Details with `urn:ietf:params:problem:ipv4-unavailable` for `/api/*`).
 
 Implementation: **`internal/ipv4outage`** middleware in **`cmd/web/main.go`** (runs before the mux). IPv4 users see HTML from **`cmd/web/templates/ipv4-unavailable.html`** on the **same URL** (not a redirect), including a human-readable link to the IPv6-only site derived from **`PROBE_V6_URL`** (default `https://ipv6.<host>/`). Probe vhosts (`ipv4.pacific…`, `ipv6.pacific…`) are **not** affected.
 
@@ -243,7 +243,7 @@ Local smoke test with fixtures:
 
 The **IPv4-unavailable page** sends `Retry-Over-IPv6-Recovery` when the IPv6 probe succeeds (`data-outage-token` on the conn-status widget). Recovery token match rate appears in the report summary.
 
-**Production rollout:** deploy binaries, set per-region **`.env.%i`** / **`PUBLIC_SITE_URL`**, confirm **`IPV4_OUTAGE_FORCE`** is unset, restart **`ipv6-web@*`** / **`ipv6-collector@*`**. Announce the drill externally before the first event. Caribbean ships with **`IPV4_OUTAGE_SKIP=1`** until announced.
+**Production rollout:** deploy binaries, set per-region **`.env.%i`** / **`PUBLIC_SITE_URL`**, confirm **`IPV4_OUTAGE_FORCE`** is unset and **`IPV4_OUTAGE_SKIP`** is unset (or `0`) for both Pacific and Caribbean, restart **`ipv6-web@*`** / **`ipv6-collector@*`**. Use **`IPV4_OUTAGE_SKIP=1`** only as an emergency rollback.
 
 ## DMARC and RPKI (collector v0.3+)
 

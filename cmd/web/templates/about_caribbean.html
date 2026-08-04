@@ -40,8 +40,10 @@
 
     <section class="country-detail-section" aria-labelledby="ipv6-day-drill">
       <h2 id="ipv6-day-drill">Monthly 6/6 IPv4 drill</h2>
-      <p>When enabled for this hostname, on the <strong>6th of every month (UTC)</strong> the main dual-stack site can run a planned 24-hour IPv4 maintenance window. During that window, connections over IPv4 receive an intentional “use IPv6 instead” signal while the service remains available over IPv6.</p>
-      <p>Caribbean launch defaults to <code>IPV4_OUTAGE_SKIP=1</code> until the drill is publicly announced for <code>{{.DefaultHost}}</code>. Operators control the drill with <code>IPV4_OUTAGE_SKIP</code> / <code>IPV4_OUTAGE_FORCE</code>; see <code>docs/development.md</code>.</p>
+      <p>On the <strong>6th of every month (UTC)</strong>, this site runs a planned 24-hour IPv4 maintenance window on <code>{{.DefaultHost}}</code>. During that window, connections over IPv4 receive an intentional “use IPv6 instead” signal while the service remains available over IPv6.</p>
+      <p>The drill helps measure how much traffic and tooling still depends on IPv4 before a longer-term transition. It follows the HTTP signaling described in the v6ops Internet-Draft <a href="https://github.com/franckhlmartin/ietf-draft-retry-over-ipv6" target="_blank" rel="noopener">HTTP Signaling of Planned IPv4 Unavailability</a> (<code>503 Service Unavailable</code> with <code>Retry-Over-IPv6</code>, and related headers).</p>
+      <p>If you cannot reach this site on the 6th, your network or device may not be using IPv6 yet. Contact your Internet provider or IT help desk and ask whether IPv6 is enabled for your connection.</p>
+      <p class="meta">Operators can disable an active drill with <code>IPV4_OUTAGE_SKIP=1</code> in the server environment. See <a href="https://github.com/franckhlmartin/ipv6-pacific/blob/main/docs/development.md" target="_blank" rel="noopener">docs/development.md</a> for testing and metrics.</p>
     </section>
 
     <section class="country-detail-section" aria-labelledby="about-why-v6">
