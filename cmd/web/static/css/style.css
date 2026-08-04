@@ -284,6 +284,46 @@ h2 { font-size: 1.15rem; margin-top: 1.5rem; }
   word-break: break-all;
 }
 
+.eez-map-metric {
+  display: flex;
+  justify-content: center;
+  margin: 0.75rem auto 0;
+  width: fit-content;
+  max-width: 100%;
+  border: 1px solid #cfe0f0;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f7fafc;
+}
+.eez-map-metric__btn {
+  appearance: none;
+  margin: 0;
+  padding: 0.4rem 0.85rem;
+  border: none;
+  border-right: 1px solid #cfe0f0;
+  background: transparent;
+  color: #334155;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  line-height: 1.3;
+}
+.eez-map-metric__btn:last-child {
+  border-right: none;
+}
+.eez-map-metric__btn:hover {
+  background: #eef4f9;
+}
+.eez-map-metric__btn[aria-checked="true"] {
+  background: #1e3a5f;
+  color: #fff;
+}
+.eez-map-metric__btn:focus-visible {
+  outline: 2px solid #0066cc;
+  outline-offset: -2px;
+  z-index: 1;
+}
 .eez-map-wrap {
   margin-inline: auto;
   width: fit-content;

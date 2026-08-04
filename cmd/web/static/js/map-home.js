@@ -7,6 +7,8 @@
 
   var svgURL = root.getAttribute('data-eez-svg') || '';
   var titleRaw = root.getAttribute('data-title-iso') || '{}';
+  var mapAriaBase =
+    root.getAttribute('data-map-aria-base') || root.getAttribute('aria-label') || '';
   var TITLE_TO_ISO = {};
   try {
     TITLE_TO_ISO = JSON.parse(titleRaw) || {};
@@ -23,6 +25,7 @@
     return tEl.textContent.replace(/\s+/g, ' ').trim();
   }
 
+  // Pref extract — keep in sync with internal/ogmap PreferredFromIndexJSON.
   function buildPreferredByISO(indexPayload) {
     var out = {};
     if (!indexPayload || !indexPayload.countries) {
@@ -41,6 +44,27 @@
     return out;
   }
 
+  // Deploy % only when domain_count > 0 (parity with economies table).
+  function buildDeployByISO(indexPayload) {
+    var out = {};
+    if (!indexPayload || !indexPayload.countries) {
+      return out;
+    }
+    for (var k = 0; k < indexPayload.countries.length; k++) {
+      var row = indexPayload.countries[k];
+      if (!row || !row.iso2) {
+        continue;
+      }
+      if (!(row.domain_count > 0)) {
+        continue;
+      }
+      if (typeof row.deployment_score_pct === 'number' && !isNaN(row.deployment_score_pct)) {
+        out[String(row.iso2).toUpperCase()] = row.deployment_score_pct;
+      }
+    }
+    return out;
+  }
+
   var ramp = global.PacificPctColorRamp;
   if (!ramp || typeof ramp.colorForPct !== 'function') {
     ramp = {
@@ -51,6 +75,129 @@
     };
     console.error('PacificPctColorRamp missing; load pct-color-ramp.js before map-home.js');
   }
+
+  var activeMetric = 'pref';
+  var preferredByISO = {};
+  var deployByISO = {};
+  var mapReady = false;
+
+  function pctForMetric(iso, metric) {
+    if (metric === 'deploy') {
+      return deployByISO[iso];
+    }
+    return preferredByISO[iso];
+  }
+
+  function applyPathMetric(path, metric) {
+    var iso = path.getAttribute('data-iso2');
+    var baseLabel = path.getAttribute('data-base-label') || iso || '';
+    var titleEl = path.querySelector('title');
+    if (!titleEl) {
+      return;
+    }
+    var pct = pctForMetric(iso, metric);
+    if (pct != null) {
+      path.style.setProperty('fill', ramp.colorForPct(pct));
+      if (metric === 'deploy') {
+        titleEl.textContent =
+          baseLabel + ' — ' + pct.toFixed(2) + '% Deploy (domain DNS/Mail/Web/DNSSEC score)';
+        path.setAttribute(
+          'aria-label',
+          baseLabel + ' — ' + pct.toFixed(2) + '% Deploy — open monitoring page'
+        );
+      } else {
+        titleEl.textContent =
+          baseLabel + ' — ' + pct.toFixed(2) + '% IPv6 preferred (APNIC Labs estimate)';
+        path.setAttribute(
+          'aria-label',
+          baseLabel + ' — ' + pct.toFixed(2) + '% IPv6 preferred — open monitoring page'
+        );
+      }
+    } else {
+      path.style.setProperty('fill', ramp.NO_DATA_GRAY);
+      titleEl.textContent = baseLabel;
+      path.setAttribute('aria-label', baseLabel + ' — open monitoring page');
+    }
+  }
+
+  function applyMetricToMap(metric) {
+    if (!mapReady) {
+      return;
+    }
+    var linked = root.querySelectorAll('.eez-region--linked');
+    for (var i = 0; i < linked.length; i++) {
+      applyPathMetric(linked[i], metric);
+    }
+    var metricLabel = metric === 'deploy' ? 'Deploy %' : 'IPv6 pref. %';
+    root.setAttribute(
+      'aria-label',
+      mapAriaBase
+        ? mapAriaBase + ' Colored by ' + metricLabel + '.'
+        : 'EEZ map colored by ' + metricLabel + '.'
+    );
+  }
+
+  function setActiveMetric(metric) {
+    if (metric !== 'pref' && metric !== 'deploy') {
+      return;
+    }
+    activeMetric = metric;
+    var group = document.querySelector('.eez-map-metric');
+    if (group) {
+      var buttons = group.querySelectorAll('[role="radio"][data-metric]');
+      for (var i = 0; i < buttons.length; i++) {
+        var btn = buttons[i];
+        var selected = btn.getAttribute('data-metric') === metric;
+        btn.setAttribute('aria-checked', selected ? 'true' : 'false');
+        btn.tabIndex = selected ? 0 : -1;
+      }
+    }
+    applyMetricToMap(metric);
+  }
+
+  function wireMetricControl() {
+    var group = document.querySelector('.eez-map-metric');
+    if (!group) {
+      return;
+    }
+    var buttons = group.querySelectorAll('[role="radio"][data-metric]');
+    for (var i = 0; i < buttons.length; i++) {
+      var btn = buttons[i];
+      var selected = btn.getAttribute('aria-checked') === 'true';
+      btn.tabIndex = selected ? 0 : -1;
+      btn.addEventListener('click', function (el) {
+        return function () {
+          setActiveMetric(el.getAttribute('data-metric'));
+        };
+      }(btn));
+      btn.addEventListener('keydown', function (el) {
+        return function (e) {
+          var key = e.key;
+          if (key !== 'ArrowLeft' && key !== 'ArrowRight' && key !== 'ArrowUp' && key !== 'ArrowDown') {
+            return;
+          }
+          e.preventDefault();
+          var list = group.querySelectorAll('[role="radio"][data-metric]');
+          var idx = -1;
+          for (var j = 0; j < list.length; j++) {
+            if (list[j] === el) {
+              idx = j;
+              break;
+            }
+          }
+          if (idx < 0) {
+            return;
+          }
+          var delta = key === 'ArrowLeft' || key === 'ArrowUp' ? -1 : 1;
+          var next = list[(idx + delta + list.length) % list.length];
+          setActiveMetric(next.getAttribute('data-metric'));
+          next.focus();
+        };
+      }(btn));
+    }
+  }
+
+  wireMetricControl();
 
   if (!svgURL) {
     root.textContent = 'EEZ map not configured.';
@@ -74,7 +221,8 @@
   ])
     .then(function (results) {
       var svgText = results[0];
-      var preferredByISO = buildPreferredByISO(results[1]);
+      preferredByISO = buildPreferredByISO(results[1]);
+      deployByISO = buildDeployByISO(results[1]);
       var parser = new DOMParser();
       var doc = parser.parseFromString(svgText, 'image/svg+xml');
       var svg = doc.documentElement;
@@ -136,23 +284,16 @@
           titleEl = document.createElementNS(svgNS, 'title');
           path.insertBefore(titleEl, path.firstChild);
         }
-        var baseLabel = label;
         path.classList.add('eez-region--linked');
         path.setAttribute('data-iso2', iso);
-        var pct = preferredByISO[iso];
-        if (pct != null) {
-          path.style.setProperty('fill', ramp.colorForPct(pct));
-          path.setAttribute('data-ipv6-preferred-pct', String(pct));
-          titleEl.textContent =
-            baseLabel + ' — ' + pct.toFixed(2) + '% IPv6 preferred (APNIC Labs estimate)';
-          path.setAttribute(
-            'aria-label',
-            baseLabel + ' — ' + pct.toFixed(2) + '% IPv6 preferred — open monitoring page'
-          );
-        } else {
-          path.style.setProperty('fill', ramp.NO_DATA_GRAY);
-          titleEl.textContent = baseLabel;
-          path.setAttribute('aria-label', baseLabel + ' — open monitoring page');
+        path.setAttribute('data-base-label', label);
+        var prefPct = preferredByISO[iso];
+        if (prefPct != null) {
+          path.setAttribute('data-ipv6-preferred-pct', String(prefPct));
+        }
+        var deployPct = deployByISO[iso];
+        if (deployPct != null) {
+          path.setAttribute('data-deploy-pct', String(deployPct));
         }
         path.style.setProperty('stroke', '#4b5563');
         path.style.setProperty('stroke-width', '0.25');
@@ -201,6 +342,8 @@
       }
 
       svg.appendChild(labelLayer);
+      mapReady = true;
+      setActiveMetric(activeMetric);
     })
     .catch(function () {
       root.textContent = 'Could not load EEZ map.';

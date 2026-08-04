@@ -26,8 +26,15 @@
     <section class="map-section">
       <div id="eez-map-root" class="eez-map-wrap" role="img" aria-label="{{.MapAriaLabel}}"
            data-eez-svg="/static/img/{{.EEZSVG}}"
-           data-title-iso="{{.TitleISOJSON}}"></div>
+           data-title-iso="{{.TitleISOJSON}}"
+           data-map-aria-base="{{.MapAriaLabel}}"></div>
       <p class="notice">{{.EEZNotice}}</p>
+      <div class="eez-map-metric" role="radiogroup" aria-label="Map metric">
+        <button type="button" class="eez-map-metric__btn" role="radio" aria-checked="true"
+                data-metric="pref" title="APNIC Labs IPv6 preferred">IPv6 pref. %</button>
+        <button type="button" class="eez-map-metric__btn" role="radio" aria-checked="false"
+                data-metric="deploy" title="Mean RowScore / 4">Deploy %</button>
+      </div>
     </section>
     {{end}}
 

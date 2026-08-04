@@ -7,7 +7,8 @@ import (
 )
 
 // PreferredFromIndexJSON builds iso2 → preferred_pc_raw like map-home.js buildPreferredByISO.
-// Only economies with a numeric APNIC Labs preferred_pc_raw get a ramp color — same rule as the homepage EEZ map.
+// Only economies with a numeric APNIC Labs preferred_pc_raw get a ramp color — same rule as the
+// homepage EEZ map's default IPv6 pref. % view (OG stays pref-only; the browser can also show Deploy %).
 func PreferredFromIndexJSON(indexJSON []byte) (map[string]float64, error) {
 	out := make(map[string]float64)
 	if len(strings.TrimSpace(string(indexJSON))) == 0 {
