@@ -1,0 +1,20 @@
+domains:
+  - domain: government.pn
+    organization: Government of the Pitcairn Islands
+    sector: Government
+  - domain: honeypipco.com
+    organization: Pitcairn Island Producers Co-operative (PIPCO)
+    sector: Government
+  - domain: miscellany.pn
+    organization: Pitcairn Monthly Newsletter
+    sector: Government
+    web_url: http://miscellany.pn/
+  - domain: nic.pn
+    organization: Pitcairn .pn Domain Registry (Nominet)
+    sector: Government
+  - domain: pitkernartisangallery.pn
+    organization: Pitkern Artisan Gallery
+    sector: Government
+  - domain: visitpitcairn.pn
+    organization: Pitcairn Islands Tourism
+    sector: Government

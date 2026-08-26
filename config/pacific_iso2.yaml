@@ -62,6 +62,9 @@ countries:
   - iso2: PF
     name: French Polynesia
     centroid: [-150.0, -17.6]
+  - iso2: PN
+    name: Pitcairn
+    centroid: [-130.1, -25.07]
   - iso2: WF
     name: Wallis and Futuna
     centroid: [-176.2, -13.3]
