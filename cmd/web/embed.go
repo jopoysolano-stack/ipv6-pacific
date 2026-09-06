@@ -23,6 +23,7 @@ func enrichOutagePage(bundle *connStatusBundle, publicSiteURL string, region *co
 		data.InlineJS = template.JS(bundle.inlineJS)
 		data.ConnStatusVariant = "outage"
 		data.SiteURL = siteURL
+		data.SiteName = region.SiteName
 	}
 }
 

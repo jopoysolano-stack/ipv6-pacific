@@ -34,6 +34,7 @@ type PageData struct {
 	InlineJS          template.JS
 	ConnStatusVariant string
 	SiteURL           string
+	SiteName          string
 	OutageToken       string
 }
 

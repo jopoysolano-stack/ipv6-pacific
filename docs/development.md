@@ -191,6 +191,8 @@ On **UTC calendar day 6** of each month (00:00:00–23:59:59 UTC), the **main du
 
 Implementation: **`internal/ipv4outage`** middleware in **`cmd/web/main.go`** (runs before the mux). IPv4 users see HTML from **`cmd/web/templates/ipv4-unavailable.html`** on the **same URL** (not a redirect), including a human-readable link to the IPv6-only site derived from **`PROBE_V6_URL`** (default `https://ipv6.<host>/`). Probe vhosts (`ipv4.pacific…`, `ipv6.pacific…`) are **not** affected.
 
+The outage page inlines the connection-status widget (`partials/conn-status.html`). **`ipv4outage.PageData`** must include every field that partial reads (`SiteURL`, `SiteName`, `InlineCSS`, `InlineJS`, `Nonce`, `OutageToken`, …); **`enrichOutagePage`** in **`cmd/web/embed.go`** fills them from the active region. A missing field makes `html/template` abort mid-`Execute` after headers are sent, so clients get truncated HTML with no outage copy. **`TestServeUnavailable_productionTemplates`** renders the real templates to catch that.
+
 | Variable | Purpose |
 |----------|---------|
 | **`IPV4_OUTAGE_SKIP=1`** | Emergency rollback (no IPv4-unavailability signal for the month) |

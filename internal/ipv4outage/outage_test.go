@@ -4,6 +4,8 @@ import (
 	"html/template"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -182,6 +184,47 @@ func TestServeUnavailable_headersAndHTML(t *testing.T) {
 	}
 	if !strings.Contains(body, `href="https://ipv6.pacific.ipv6forum.com/"`) {
 		t.Fatalf("expected ipv6-only link, body=%s", body)
+	}
+}
+
+func TestServeUnavailable_productionTemplates(t *testing.T) {
+	_, file, _, ok := runtime.Caller(0)
+	if !ok {
+		t.Fatal("runtime.Caller failed")
+	}
+	root := filepath.Join(filepath.Dir(file), "../..")
+	tmpl, err := template.ParseFiles(
+		filepath.Join(root, "cmd/web/templates/ipv4-unavailable.html"),
+		filepath.Join(root, "cmd/web/templates/partials/conn-status.html"),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	now := time.Date(2026, 6, 6, 10, 0, 0, 0, time.UTC)
+	until := UnavailableUntil(now)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set("Accept", "text/html")
+	rec := httptest.NewRecorder()
+	enrich := func(_ *http.Request, data *PageData) {
+		data.SiteURL = "https://pacific.ipv6forum.com"
+		data.SiteName = "Pacific Islands IPv6 Monitor"
+		data.InlineCSS = "/*css*/"
+		data.InlineJS = "/*js*/"
+		data.Nonce = "test-nonce"
+	}
+	ServeUnavailable(rec, req, tmpl, until, "tok123", "https://ipv6.pacific.ipv6forum.com/", enrich)
+	if rec.Code != http.StatusServiceUnavailable {
+		t.Fatalf("status=%d", rec.Code)
+	}
+	body := rec.Body.String()
+	if !strings.Contains(body, "This site is not available on your current Internet connection") {
+		t.Fatalf("missing outage headline; body truncated?\n%s", body)
+	}
+	if !strings.Contains(body, "</html>") {
+		t.Fatalf("incomplete HTML document; body=%s", body)
+	}
+	if !strings.Contains(body, "Pacific Islands IPv6 Monitor") {
+		t.Fatalf("expected SiteName in body; body=%s", body)
 	}
 }
 
