@@ -70,6 +70,7 @@ func checkDMARC(ctx context.Context, apex string, cfg Config) model.DMARCColumn 
 		SubdomainPolicy: spEffective,
 		RawP:            rawP,
 		RawSP:           rawSP,
+		Record:          raw,
 	}
 	col.Display = dmarcDisplay(policy, rawSP, spEffective)
 	col.ScorePct, _ = rampscore.DMARCScorePct(col.State, col.Policy, col.SubdomainPolicy)
@@ -134,13 +135,10 @@ func effectiveSP(orgPolicy, rawSP string) string {
 }
 
 func dmarcDisplay(policy, rawSP, spEffective string) string {
-	if rawSP != "" && strings.ToLower(rawSP) != spEffective {
-		return policy + " / " + spEffective
-	}
 	if spEffective != "" && spEffective != policy {
 		return "p=" + policy + ", sp=" + spEffective
 	}
-	return policy
+	return "p=" + policy
 }
 
 func dmarcLegendExplanation() LegendCheckExplanation {

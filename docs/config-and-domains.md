@@ -32,6 +32,7 @@ List each regional organization **once**, under its **headquarters** economy’s
 | `spc.int` | NC |
 | `forumsec.org` | FJ |
 | `pita.org.fj` | FJ |
+| `picisoc.org` | FJ |
 | `sprep.org` | WS |
 
 ### Caribbean

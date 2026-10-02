@@ -75,6 +75,10 @@ domains:
   - domain: pmoffice.gov.fj
     organization: Office of the Prime Minister
     sector: Government
+  - domain: picisoc.org
+    organization: Pacific Islands Chapter of the Internet Society (PICISOC)
+    sector: Regional
+    regional: true
   - domain: pita.org.fj
     organization: Pacific Islands Telecommunications Association
     sector: Regional

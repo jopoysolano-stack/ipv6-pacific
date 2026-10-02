@@ -29,27 +29,34 @@ func RunDomain(ctx context.Context, apex string, cfg Config, meta DomainMeta) mo
 		Sector:       meta.Sector,
 	}
 
-	dnsCol, _, err := checkDNS(ctx, apex, cfg)
+	dnsCol, dnsHosts, err := checkDNS(ctx, apex, cfg)
 	if err != nil {
 		res.Error = fmt.Sprintf("dns: %v", err)
 	}
 	res.DNS = dnsCol
+	res.DNSHosts = dnsHosts
 	logStep(cfg, "DNS", fmt.Sprintf("DNSResolveTimeout=%s (NS/exchange + resolver); UDP SOA probes ≤3s", dur(cfg.DNSResolveTimeout)), summarizeDNS(dnsCol, err))
 
-	mailCol, err := checkMail(ctx, apex, cfg)
+	mailCol, mailHosts, err := checkMail(ctx, apex, cfg)
 	if err != nil {
 		if res.Error == "" {
 			res.Error = fmt.Sprintf("mail: %v", err)
 		}
 	}
 	res.Mail = mailCol
+	res.MailHosts = mailHosts
 	logStep(cfg, "Mail", mailTimeoutDesc(cfg), summarizeMail(mailCol, err))
 
-	webCol, _, err := checkWeb(ctx, apex, cfg, meta.WebURL)
+	webCol, webHost, err := checkWeb(ctx, apex, cfg, meta.WebURL)
 	if err != nil && res.Error == "" {
 		res.Error = fmt.Sprintf("web: %v", err)
 	}
 	res.Web = webCol
+	if webHost.Host != "" {
+		res.WebHosts = []model.ServiceHost{webHost}
+		res.WebHost = webHost.Host
+		res.WebProbes = webHost.Probes
+	}
 	logStep(cfg, "Web", fmt.Sprintf("HTTPTimeout=%s (HTTPS discover + per-family GET)", dur(cfg.HTTPTimeout)), summarizeWeb(webCol, err))
 
 	res.DNSSEC = checkDNSSEC(ctx, apex, cfg)

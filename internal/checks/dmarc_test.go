@@ -22,7 +22,10 @@ func TestDMARCDisplay(t *testing.T) {
 	if dmarcDisplay("none", "reject", "reject") != "p=none, sp=reject" {
 		t.Fatalf("display with distinct sp")
 	}
-	if dmarcDisplay("reject", "", "reject") != "reject" {
+	if dmarcDisplay("reject", "", "reject") != "p=reject" {
 		t.Fatalf("display p only")
+	}
+	if dmarcDisplay("none", "", "none") != "p=none" {
+		t.Fatalf("display p=none (not bare none)")
 	}
 }

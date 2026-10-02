@@ -7,7 +7,7 @@ The same Go codebase runs **one web + collector pair per region** (`REGION=pacif
 ## Services
 
 - **`cmd/collector`** — measures configured domains (NIST-style DNS / Mail / Web + simplified DNSSEC + **DMARC** `_dmarc` TXT), ingests **APNIC Labs** `v6economy/{CC}.json`, fetches **Hurricane Electric** [`bgp.he.net/country/{CC}`](https://bgp.he.net/) and merges per-ASN **IPv6 preferred** from [`stats.labs.apnic.net/ipv6/{CC}`](https://stats.labs.apnic.net/ipv6/TK) into `bgp_he_net`, samples per-ASN **RPKI** via [RIPEstat](https://stat.ripe.net/), writes `data/{region}/countries/{ISO2}.json` and `data/{region}/index.json`.
-- **`cmd/web`** — serves the UI, JSON API, region EEZ overview (`static/img/EEZ_*.svg` from `config/regions.yaml`), and a sortable home economies table. Set **`PUBLIC_SITE_URL`** when TLS terminates in front of the app.
+- **`cmd/web`** — serves the UI, JSON API, region EEZ overview (`static/img/EEZ_*.svg` from `config/regions.yaml`), sortable home economies table, per-economy pages (`/country/{ISO2}`), and shareable per-domain detail pages (`/domain/{name}`). Set **`PUBLIC_SITE_URL`** when TLS terminates in front of the app.
 
 ## Quick start (Pacific)
 

@@ -12,8 +12,9 @@ import (
 	"github.com/pacific-monitor/pacific-monitor/internal/model"
 )
 
-func checkMail(ctx context.Context, apex string, cfg Config) (model.ServiceColumn, error) {
+func checkMail(ctx context.Context, apex string, cfg Config) (model.ServiceColumn, []model.ServiceHost, error) {
 	col := model.ServiceColumn{Location: "-", Display: "[0] -/-/- [-]"}
+	var hosts []model.ServiceHost
 
 	c := new(dns.Client)
 	c.Timeout = cfg.DNSResolveTimeout
@@ -27,7 +28,7 @@ func checkMail(ctx context.Context, apex string, cfg Config) (model.ServiceColum
 		col.Display = fmt.Sprintf("[0] -/-/- [-]")
 		col.IntentionallyNA = true
 		col.Class = model.DeployUnknown
-		return col, nil
+		return col, hosts, nil
 	}
 
 	var mxHosts []string
@@ -41,7 +42,7 @@ func checkMail(ctx context.Context, apex string, cfg Config) (model.ServiceColum
 		col.Display = "[0] -/-/- [-]"
 		col.IntentionallyNA = true
 		col.Class = model.DeployUnknown
-		return col, nil
+		return col, hosts, nil
 	}
 
 	resolver := net.Resolver{PreferGo: true}
@@ -55,8 +56,11 @@ func checkMail(ctx context.Context, apex string, cfg Config) (model.ServiceColum
 	v6cfg, v6reach, v6op := 0, 0, 0
 
 	for _, host := range uniqueStrings(mxHosts) {
+		loc := classifyLocation(host, apex)
+		sh := model.ServiceHost{Host: host, Location: loc}
 		addrs, err := resolver.LookupIPAddr(ctx, host)
 		if err != nil {
+			hosts = append(hosts, sh)
 			continue
 		}
 		var v4s, v6s []net.IP
@@ -69,21 +73,32 @@ func checkMail(ctx context.Context, apex string, cfg Config) (model.ServiceColum
 		}
 		v4s = uniqueIPs(v4s)
 		v6s = uniqueIPs(v6s)
+		for _, ip := range v4s {
+			sh.IPv4 = append(sh.IPv4, ip.String())
+		}
+		for _, ip := range v6s {
+			sh.IPv6 = append(sh.IPv6, ip.String())
+		}
 		v4cfg += len(v4s)
 		v6cfg += len(v6s)
 
 		for _, ip := range v4s {
 			v4reach++
-			if smtpEhlo(ctx, net.JoinHostPort(ip.String(), "25"), cfg.SMTPTimeout) {
+			ok, reason := smtpEhlo(ctx, net.JoinHostPort(ip.String(), "25"), cfg.SMTPTimeout)
+			sh.Probes = append(sh.Probes, model.ProbeEndpoint{IP: ip.String(), Family: "ipv4", OK: ok, Error: reason})
+			if ok {
 				v4op++
 			}
 		}
 		for _, ip := range v6s {
 			v6reach++
-			if smtpEhlo(ctx, net.JoinHostPort(ip.String(), "25"), cfg.SMTPTimeout) {
+			ok, reason := smtpEhlo(ctx, net.JoinHostPort(ip.String(), "25"), cfg.SMTPTimeout)
+			sh.Probes = append(sh.Probes, model.ProbeEndpoint{IP: ip.String(), Family: "ipv6", OK: ok, Error: reason})
+			if ok {
 				v6op++
 			}
 		}
+		hosts = append(hosts, sh)
 	}
 
 	col.IPv4 = model.ServiceMetrics{Configured: v4cfg, Reachable: v4reach, Operational: v4op}
@@ -92,17 +107,17 @@ func checkMail(ctx context.Context, apex string, cfg Config) (model.ServiceColum
 	col.Display = fmt.Sprintf("[%d MX] v4 smtp %d/%d/%d v6 smtp %d/%d/%d [%s]",
 		len(mxHosts), v4cfg, v4reach, v4op, v6cfg, v6reach, v6op, col.Location)
 	col.Class = classifyService(col.IPv4, col.IPv6)
-	return col, nil
+	return col, hosts, nil
 }
 
-func smtpEhlo(ctx context.Context, addr string, timeout time.Duration) bool {
+func smtpEhlo(ctx context.Context, addr string, timeout time.Duration) (bool, string) {
 	ctx2, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	var d net.Dialer
 	conn, err := d.DialContext(ctx2, "tcp", addr)
 	if err != nil {
-		return false
+		return false, classifyNetError(err)
 	}
 	defer conn.Close()
 
@@ -112,19 +127,19 @@ func smtpEhlo(ctx context.Context, addr string, timeout time.Duration) bool {
 
 	line, err := br.ReadString('\n')
 	if err != nil || !strings.HasPrefix(line, "220") {
-		return false
+		return false, ProbeNoBanner
 	}
 	fmt.Fprintf(conn, "EHLO pacific-monitor.local\r\n")
 	for i := 0; i < 20; i++ {
 		l, err := br.ReadString('\n')
 		if err != nil {
-			return false
+			return false, ProbeNoBanner
 		}
 		if strings.HasPrefix(l, "250 ") {
-			return true
+			return true, ""
 		}
 	}
-	return false
+	return false, ProbeNoBanner
 }
 
 func mailLegendExplanation() LegendCheckExplanation {

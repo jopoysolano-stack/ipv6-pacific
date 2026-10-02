@@ -11,9 +11,9 @@ import (
 	"github.com/pacific-monitor/pacific-monitor/internal/model"
 )
 
-func checkDNS(ctx context.Context, apex string, cfg Config) (model.ServiceColumn, []string, error) {
+func checkDNS(ctx context.Context, apex string, cfg Config) (model.ServiceColumn, []model.ServiceHost, error) {
 	col := model.ServiceColumn{Location: "-", Display: "[0] -/-/- [-]"}
-	var locTags []string
+	var hosts []model.ServiceHost
 
 	resolver := net.Resolver{PreferGo: true}
 
@@ -31,10 +31,11 @@ func checkDNS(ctx context.Context, apex string, cfg Config) (model.ServiceColumn
 	if err != nil || r == nil {
 		col.Display = fmt.Sprintf("[S] error: %v", err)
 		col.Class = model.DeployUnknown
-		return col, locTags, err
+		return col, hosts, err
 	}
 
 	var nsHosts []string
+	var locTags []string
 	for _, a := range r.Answer {
 		if ns, ok := a.(*dns.NS); ok {
 			h := strings.TrimSuffix(strings.ToLower(ns.Ns), ".")
@@ -46,7 +47,7 @@ func checkDNS(ctx context.Context, apex string, cfg Config) (model.ServiceColumn
 		col.Display = "[0] -/-/- [-]"
 		col.Class = model.DeployUnknown
 		col.Location = "-"
-		return col, locTags, nil
+		return col, hosts, nil
 	}
 
 	col.Location = mergeLocationTags(locTags)
@@ -55,8 +56,11 @@ func checkDNS(ctx context.Context, apex string, cfg Config) (model.ServiceColumn
 	v6cfg, v6reach, v6op := 0, 0, 0
 
 	for _, host := range uniqueStrings(nsHosts) {
+		loc := classifyLocation(host, apex)
+		sh := model.ServiceHost{Host: host, Location: loc}
 		addrs, err := resolver.LookupIPAddr(ctxLookup, host)
 		if err != nil {
+			hosts = append(hosts, sh)
 			continue
 		}
 		var v4s, v6s []net.IP
@@ -70,21 +74,33 @@ func checkDNS(ctx context.Context, apex string, cfg Config) (model.ServiceColumn
 		v4s = uniqueIPs(v4s)
 		v6s = uniqueIPs(v6s)
 
+		for _, ip := range v4s {
+			sh.IPv4 = append(sh.IPv4, ip.String())
+		}
+		for _, ip := range v6s {
+			sh.IPv6 = append(sh.IPv6, ip.String())
+		}
+
 		v4cfg += len(v4s)
 		v6cfg += len(v6s)
 
 		for _, ip := range v4s {
-			if udpOK(ctx, c, ip.String()+":53", apex, dns.TypeSOA) {
+			ok, reason := udpProbe(ctx, c, ip.String()+":53", apex, dns.TypeSOA)
+			sh.Probes = append(sh.Probes, model.ProbeEndpoint{IP: ip.String(), Family: "ipv4", OK: ok, Error: reason})
+			if ok {
 				v4reach++
 				v4op++
 			}
 		}
 		for _, ip := range v6s {
-			if udpOK(ctx, c, "["+ip.String()+"]:53", apex, dns.TypeSOA) {
+			ok, reason := udpProbe(ctx, c, "["+ip.String()+"]:53", apex, dns.TypeSOA)
+			sh.Probes = append(sh.Probes, model.ProbeEndpoint{IP: ip.String(), Family: "ipv6", OK: ok, Error: reason})
+			if ok {
 				v6reach++
 				v6op++
 			}
 		}
+		hosts = append(hosts, sh)
 	}
 
 	col.IPv4 = model.ServiceMetrics{Configured: v4cfg, Reachable: v4reach, Operational: v4op}
@@ -93,17 +109,26 @@ func checkDNS(ctx context.Context, apex string, cfg Config) (model.ServiceColumn
 	col.Display = fmt.Sprintf("[%d] %d/%d/%d [%s]", len(un), v6cfg, v6reach, v6op, col.Location)
 	col.Class = classifyService(col.IPv4, col.IPv6)
 
-	return col, locTags, nil
+	return col, hosts, nil
 }
 
-func udpOK(ctx context.Context, c *dns.Client, serverAddr, qname string, qtype uint16) bool {
+func udpProbe(ctx context.Context, c *dns.Client, serverAddr, qname string, qtype uint16) (bool, string) {
 	msg := new(dns.Msg)
 	msg.SetQuestion(dns.Fqdn(qname), qtype)
 	msg.RecursionDesired = false
 	ctx2, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 	r, _, err := c.ExchangeContext(ctx2, msg, serverAddr)
-	return err == nil && r != nil && (r.Rcode == dns.RcodeSuccess || r.Rcode == dns.RcodeNameError)
+	if err != nil {
+		return false, classifyNetError(err)
+	}
+	if r == nil {
+		return false, ProbeOther
+	}
+	if r.Rcode == dns.RcodeSuccess || r.Rcode == dns.RcodeNameError {
+		return true, ""
+	}
+	return false, ProbeDNSError
 }
 
 func uniqueStrings(in []string) []string {

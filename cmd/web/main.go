@@ -15,9 +15,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pacific-monitor/pacific-monitor/internal/advice"
 	"github.com/pacific-monitor/pacific-monitor/internal/bgphe"
 	"github.com/pacific-monitor/pacific-monitor/internal/checks"
 	"github.com/pacific-monitor/pacific-monitor/internal/config"
+	"github.com/pacific-monitor/pacific-monitor/internal/domainlookup"
+	"github.com/pacific-monitor/pacific-monitor/internal/domainmiss"
 	"github.com/pacific-monitor/pacific-monitor/internal/dotenv"
 	"github.com/pacific-monitor/pacific-monitor/internal/httpserver"
 	"github.com/pacific-monitor/pacific-monitor/internal/ipv4outage"
@@ -92,10 +95,16 @@ func main() {
 		"bgpheRowAria":      bgphe.RowAriaLabel,
 		"dmarcPctAttr":      dmarcPctAttr,
 		"dmarcInspectorURL": dmarcInspectorURL,
+		"dnsvizURL":         dnsvizURL,
 		"rpkiPctAttr":       rpkiPctAttr,
 		"rpkiDisplayPct":    rpkiDisplayPct,
 		"rpkiStatURL":       rpkiStatURL,
 		"rpkiStatusText":    rpkiStatusText,
+		"joinStrings":       strings.Join,
+		"checkAdvice":       checkAdviceFor,
+		"replaceAll":        strings.ReplaceAll,
+		"deployClassLabel":  deployClassLabel,
+		"dnssecStateLabel":  dnssecStateLabel,
 	}).ParseFS(templateFS, "templates/*.html", "templates/partials/*.html")
 	if err != nil {
 		log.Fatal(err)
@@ -131,7 +140,7 @@ func main() {
 	mux.HandleFunc("GET /favicon.ico", serveRootFaviconICO)
 	mux.HandleFunc("GET /robots.txt", serveRobotsTxt)
 	mux.HandleFunc("GET /sitemap.xml", func(w http.ResponseWriter, r *http.Request) {
-		serveSitemap(w, r, dataDir, economies)
+		serveSitemap(w, r, dataDir, economies, allowed)
 	})
 	mux.HandleFunc("GET /og/map.png", func(w http.ResponseWriter, r *http.Request) {
 		serveOGMapPNG(w, r, dataDir, region, showEEZMap)
@@ -152,6 +161,9 @@ func main() {
 	mux.HandleFunc("GET /about", func(w http.ResponseWriter, r *http.Request) { aboutPage(tmpl, w, r, region) })
 	mux.HandleFunc("GET /country/{iso}", func(w http.ResponseWriter, r *http.Request) {
 		countryPage(tmpl, w, r, dataDir, economies, allowed, region)
+	})
+	mux.HandleFunc("GET /domain/{name}", func(w http.ResponseWriter, r *http.Request) {
+		domainPage(tmpl, w, r, dataDir, economies, allowed, region)
 	})
 	mux.HandleFunc("GET /api/index.json", func(w http.ResponseWriter, r *http.Request) { serveFile(w, filepath.Join(dataDir, "index.json")) })
 	// {iso} must be a full path segment (Go 1.22+); use /api/countries/FJ not .../FJ.json
@@ -583,6 +595,131 @@ func countryComingSoon(tmpl *template.Template, w http.ResponseWriter, r *http.R
 	_ = tmpl.ExecuteTemplate(w, "country_soon.html", data)
 }
 
+func domainPage(tmpl *template.Template, w http.ResponseWriter, r *http.Request, dataDir string, pacific *config.PacificList, allowed map[string]struct{}, region *config.RegionMeta) {
+	name := domainlookup.Normalize(r.PathValue("name"))
+	if name == "" {
+		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+	found, ok := domainlookup.Find(dataDir, allowed, name)
+	if !ok {
+		domainmiss.Default.Log(r, name, region.ID)
+		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+	economyName := found.Name
+	if pacific != nil {
+		for _, c := range pacific.Countries {
+			if strings.ToUpper(c.ISO2) == found.ISO2 {
+				economyName = c.Name
+				break
+			}
+		}
+	}
+	d := found.Domain
+	adviceReport := advice.ForDomain(d)
+	checkLegend := checks.CountryLegendCheckExplanations()
+	legendByID := map[string]checks.LegendCheckExplanation{}
+	for _, L := range checkLegend {
+		legendByID[L.ID] = L
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	borderClass := "border--ipv4"
+	if httpserver.IsIPv6Client(r) {
+		borderClass = "border--ipv6"
+	}
+	probeV4, probeV6, probeDS := probeURLsFromEnv()
+	collected := ""
+	if !d.CollectedAt.IsZero() {
+		collected = d.CollectedAt.UTC().Format("2006-01-02 15:04 UTC")
+	} else if !found.Country.GeneratedAt.IsZero() {
+		collected = found.Country.GeneratedAt.UTC().Format("2006-01-02 15:04 UTC")
+	}
+	pageTitle := d.Domain + " — " + region.SiteName
+	metaDesc := fmt.Sprintf("%s (%s) — DNS, mail, web, DNSSEC, and DMARC measurement estimates for %s.", d.Domain, economyName, region.SiteName)
+	data := map[string]any{
+		"ISO":            found.ISO2,
+		"EconomyName":    economyName,
+		"SiteName":       region.SiteName,
+		"Domain":         d,
+		"Title":          pageTitle,
+		"BorderClass":    borderClass,
+		"FooterVariant":  "domain",
+		"ProbeV4":        probeV4,
+		"ProbeV6":        probeV6,
+		"ProbeDS":        probeDS,
+		"ShowDualProbe":  probeV4 != "" && probeV6 != "",
+		"RowScore":       scoring.RowScore(d),
+		"MaxRowScore":    scoring.MaxRowScore,
+		"Collected":      collected,
+		"Advice":         adviceReport,
+		"HasHostDetail":  advice.HasHostDetail(d),
+		"LegendByID":     legendByID,
+		"LegendStatus":   checks.CountryLegendStatusItems(),
+		"DNSVizURL":      dnsvizURL(d.Domain),
+		"DMARCInspector": dmarcInspectorURL(d.Domain),
+		"Nonce":          httpserver.CSPNonce(r),
+	}
+	seoMerge(r, data, pageTitle, metaDesc, region.SiteName)
+	mergeOutagePageData(data)
+	_ = tmpl.ExecuteTemplate(w, "domain.html", data)
+}
+
+// checkAdviceFor returns actionable (non-OK) advice items for a check id.
+func checkAdviceFor(r advice.Report, id string) []advice.Item {
+	for _, c := range r.Checks {
+		if c.ID != id {
+			continue
+		}
+		var out []advice.Item
+		for _, it := range c.Items {
+			if it.OK {
+				continue
+			}
+			out = append(out, it)
+		}
+		return out
+	}
+	return nil
+}
+
+// deployClassLabel returns the human legend label for a DNS/Mail/Web class chip.
+func deployClassLabel(class model.DeployClass) string {
+	switch class {
+	case model.DeployIPv4Only:
+		return "IPv4-only"
+	case model.DeployDual:
+		return "Dual-stack"
+	case model.DeployIPv6Only:
+		return "IPv6-only"
+	case model.DeployUnknown:
+		return "Unknown"
+	default:
+		if class == "" {
+			return "Unknown"
+		}
+		return string(class)
+	}
+}
+
+// dnssecStateLabel returns a short human label for DNSSEC state.
+func dnssecStateLabel(col model.DNSSECColumn) string {
+	switch col.State {
+	case "signed":
+		return "Signed"
+	case "unsigned":
+		return "Unsigned"
+	case "error":
+		return "Error"
+	default:
+		if col.State == "" {
+			return "Unknown"
+		}
+		return col.State
+	}
+}
+
 // dmarcPctAttr returns data-pct for ramp coloring (empty = grey).
 func dmarcPctAttr(col model.DMARCColumn) string {
 	switch col.State {
@@ -621,6 +758,16 @@ func dmarcInspectorURL(domain string) string {
 	v := url.Values{}
 	v.Set("domain", domain)
 	return "https://dmarcian.com/dmarc-inspector/?" + v.Encode()
+}
+
+// dnsvizURL links to DNSViz DNSSEC analysis for the apex domain.
+func dnsvizURL(domain string) string {
+	domain = strings.TrimSpace(strings.ToLower(domain))
+	domain = strings.TrimSuffix(domain, ".")
+	if domain == "" {
+		return "https://dnsviz.net/"
+	}
+	return "https://dnsviz.net/d/" + url.PathEscape(domain) + "/dnssec/"
 }
 
 // rpkiStatURL links to the RIPEstat resource overview for this ASN.

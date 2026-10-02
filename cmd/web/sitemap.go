@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/pacific-monitor/pacific-monitor/internal/config"
+	"github.com/pacific-monitor/pacific-monitor/internal/domainlookup"
 	"github.com/pacific-monitor/pacific-monitor/internal/model"
 	"github.com/pacific-monitor/pacific-monitor/internal/siteurl"
 )
@@ -27,7 +28,7 @@ type sitemapURLEntry struct {
 	Lastmod string `xml:"lastmod,omitempty"`
 }
 
-func serveSitemap(w http.ResponseWriter, r *http.Request, dataDir string, pacific *config.PacificList) {
+func serveSitemap(w http.ResponseWriter, r *http.Request, dataDir string, pacific *config.PacificList, allowed map[string]struct{}) {
 	type pathMod struct {
 		path   string
 		modUTC time.Time
@@ -65,6 +66,15 @@ func serveSitemap(w http.ResponseWriter, r *http.Request, dataDir string, pacifi
 		row := pathMod{path: "/country/" + iso}
 		if err == nil {
 			row.modUTC = st.ModTime().UTC()
+			row.hasMod = true
+		}
+		rows = append(rows, row)
+	}
+
+	for _, e := range domainlookup.ListAll(dataDir, allowed) {
+		row := pathMod{path: "/domain/" + e.Domain}
+		if e.HasMod {
+			row.modUTC = e.ModUTC
 			row.hasMod = true
 		}
 		rows = append(rows, row)

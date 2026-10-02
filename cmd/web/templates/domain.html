@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{.Title}}</title>
+  {{template "seo" .}}
+  {{template "analyticsHead" .}}
+  <link rel="stylesheet" href="/static/css/style.css"/>
+</head>
+<body class="{{.BorderClass}}">
+  {{template "siteBanners" .}}
+  <header class="site-header">
+    <div class="site-header__lead">
+      <p><a href="/">← {{.SiteName}}</a></p>
+      <h1>{{.Domain.Domain}}</h1>
+      <p class="meta">
+        {{if .Domain.Organization}}{{.Domain.Organization}}{{end}}
+        {{if and .Domain.Organization .Domain.Sector}} · {{end}}
+        {{if .Domain.Sector}}{{.Domain.Sector}}{{end}}
+        {{if or .Domain.Organization .Domain.Sector}} · {{end}}
+        <a href="/country/{{.ISO}}">{{.EconomyName}}</a>
+      </p>
+    </div>
+    <div class="site-header__conn">
+      {{template "connStatusButton" .}}
+    </div>
+  </header>
+
+  <main class="domain-detail">
+    <section class="summary-strip" aria-label="Domain summary">
+      <div class="stat"><span class="stat-label">Score</span><span class="stat-value">{{.RowScore}}/{{.MaxRowScore}}</span></div>
+      <div class="stat" title="Worst of DNS, Mail, and Web (DNSSEC and DMARC are separate)">
+        <span class="stat-label">Overall</span>
+        <span class="stat-value"><span class="legend-chip cell--{{.Domain.RollupClass}}">{{deployClassLabel .Domain.RollupClass}}</span></span>
+      </div>
+      <div class="stat"><span class="stat-label">Economy</span><span class="stat-value"><a href="/country/{{.ISO}}">{{.EconomyName}}</a></span></div>
+      <div class="stat"><span class="stat-label">Collected</span><span class="stat-value stat-value--meta">{{if .Collected}}{{.Collected}}{{else}}—{{end}}</span></div>
+    </section>
+
+    <p class="domain-actions">
+      <a class="domain-action" href="https://{{.Domain.Domain}}/" rel="noopener noreferrer">Visit website</a>
+      <a class="domain-action" href="/country/{{.ISO}}">View {{.EconomyName}}</a>
+    </p>
+    <p class="meta domain-disclaimer">Measurement estimates from a single vantage point — not a compliance certification. Guidance below is for operators, not an SLA.</p>
+
+    {{if .Advice.Priority}}
+    <section class="domain-priority" aria-label="Priority next steps">
+      <h2>Priority next steps</h2>
+      <ul>
+        {{range .Advice.Priority}}
+        <li>{{.}}</li>
+        {{end}}
+      </ul>
+    </section>
+    {{end}}
+
+    {{if not .HasHostDetail}}
+    <p class="meta">Host-level detail (NS/MX/web addresses and probe outcomes) appears after the next collector run (v0.4+).</p>
+    {{end}}
+
+    <h2>Checks</h2>
+    <div class="domain-check-grid">
+
+      {{$dnsL := index .LegendByID "dns"}}
+      <article class="domain-check-card">
+        <div class="domain-check-card__head">
+          <h3>DNS</h3>
+          <span class="legend-chip cell--{{.Domain.DNS.Class}}">{{deployClassLabel .Domain.DNS.Class}}</span>
+        </div>
+        <p class="domain-check-display"><code>{{.Domain.DNS.Display}}</code></p>
+        {{if $dnsL.PlainMeaning}}<p><strong>Meaning:</strong> {{$dnsL.PlainMeaning}}</p>{{end}}
+        <p class="meta">IPv4 {{.Domain.DNS.IPv4.Configured}}/{{.Domain.DNS.IPv4.Reachable}}/{{.Domain.DNS.IPv4.Operational}} · IPv6 {{.Domain.DNS.IPv6.Configured}}/{{.Domain.DNS.IPv6.Reachable}}/{{.Domain.DNS.IPv6.Operational}} · location {{.Domain.DNS.Location}}</p>
+        {{if .Domain.DNSHosts}}
+        <div class="table-wrap domain-host-wrap">
+          <table class="domain-host-table">
+            <thead><tr><th>Host</th><th>IPv4</th><th>IPv6</th><th>Probes</th></tr></thead>
+            <tbody>
+              {{range .Domain.DNSHosts}}
+              <tr>
+                <td><code>{{.Host}}</code> {{if .Location}}[{{.Location}}]{{end}}</td>
+                <td class="mono">{{if .IPv4}}{{joinStrings .IPv4 ", "}}{{else}}—{{end}}</td>
+                <td class="mono">{{if .IPv6}}{{joinStrings .IPv6 ", "}}{{else}}—{{end}}</td>
+                <td class="mono">{{range .Probes}}{{.Family}} {{.IP}} {{if .OK}}ok{{else}}{{.Error}}{{end}}; {{end}}</td>
+              </tr>
+              {{end}}
+            </tbody>
+          </table>
+        </div>
+        {{end}}
+        {{with checkAdvice .Advice "dns"}}
+        <div class="domain-action-block">
+          <p><strong>📌 Action item(s):</strong></p>
+          <ul>{{range .}}<li>{{.Text}}</li>{{end}}</ul>
+        </div>
+        {{end}}
+      </article>
+
+      {{$mailL := index .LegendByID "mail"}}
+      <article class="domain-check-card">
+        <div class="domain-check-card__head">
+          <h3>Mail</h3>
+          <span class="legend-chip cell--{{.Domain.Mail.Class}}">{{deployClassLabel .Domain.Mail.Class}}</span>
+        </div>
+        <p class="domain-check-display"><code>{{.Domain.Mail.Display}}</code></p>
+        {{if $mailL.PlainMeaning}}<p><strong>Meaning:</strong> {{$mailL.PlainMeaning}}</p>{{end}}
+        {{if .Domain.Mail.IntentionallyNA}}
+        <p class="meta">No MX — intentionally N/A for this domain.</p>
+        {{else}}
+        <p class="meta">IPv4 SMTP {{.Domain.Mail.IPv4.Configured}}/{{.Domain.Mail.IPv4.Reachable}}/{{.Domain.Mail.IPv4.Operational}} · IPv6 {{.Domain.Mail.IPv6.Configured}}/{{.Domain.Mail.IPv6.Reachable}}/{{.Domain.Mail.IPv6.Operational}} · location {{.Domain.Mail.Location}}</p>
+        {{end}}
+        {{if .Domain.MailHosts}}
+        <div class="table-wrap domain-host-wrap">
+          <table class="domain-host-table">
+            <thead><tr><th>Host</th><th>IPv4</th><th>IPv6</th><th>Probes</th></tr></thead>
+            <tbody>
+              {{range .Domain.MailHosts}}
+              <tr>
+                <td><code>{{.Host}}</code> {{if .Location}}[{{.Location}}]{{end}}</td>
+                <td class="mono">{{if .IPv4}}{{joinStrings .IPv4 ", "}}{{else}}—{{end}}</td>
+                <td class="mono">{{if .IPv6}}{{joinStrings .IPv6 ", "}}{{else}}—{{end}}</td>
+                <td class="mono">{{range .Probes}}{{.Family}} {{.IP}} {{if .OK}}ok{{else}}{{.Error}}{{end}}; {{end}}</td>
+              </tr>
+              {{end}}
+            </tbody>
+          </table>
+        </div>
+        {{end}}
+        {{with checkAdvice .Advice "mail"}}
+        <div class="domain-action-block">
+          <p><strong>📌 Action item(s):</strong></p>
+          <ul>{{range .}}<li>{{.Text}}</li>{{end}}</ul>
+        </div>
+        {{end}}
+      </article>
+
+      {{$webL := index .LegendByID "web"}}
+      <article class="domain-check-card">
+        <div class="domain-check-card__head">
+          <h3>Web</h3>
+          <span class="legend-chip cell--{{.Domain.Web.Class}}">{{deployClassLabel .Domain.Web.Class}}</span>
+        </div>
+        <p class="domain-check-display"><code>{{.Domain.Web.Display}}</code></p>
+        {{if $webL.PlainMeaning}}<p><strong>Meaning:</strong> {{$webL.PlainMeaning}}</p>{{end}}
+        <p class="meta">IPv4 {{.Domain.Web.IPv4.Configured}}/{{.Domain.Web.IPv4.Reachable}}/{{.Domain.Web.IPv4.Operational}} · IPv6 {{.Domain.Web.IPv6.Configured}}/{{.Domain.Web.IPv6.Reachable}}/{{.Domain.Web.IPv6.Operational}} · location {{.Domain.Web.Location}}</p>
+        {{if .Domain.WebHosts}}
+        <div class="table-wrap domain-host-wrap">
+          <table class="domain-host-table">
+            <thead><tr><th>Host</th><th>IPv4</th><th>IPv6</th><th>Probes</th></tr></thead>
+            <tbody>
+              {{range .Domain.WebHosts}}
+              <tr>
+                <td><code>{{.Host}}</code> {{if .Location}}[{{.Location}}]{{end}}</td>
+                <td class="mono">{{if .IPv4}}{{joinStrings .IPv4 ", "}}{{else}}—{{end}}</td>
+                <td class="mono">{{if .IPv6}}{{joinStrings .IPv6 ", "}}{{else}}—{{end}}</td>
+                <td class="mono">{{range .Probes}}{{.Family}}{{if .IP}} {{.IP}}{{end}} {{if .OK}}ok{{else}}{{.Error}}{{end}}; {{end}}</td>
+              </tr>
+              {{end}}
+            </tbody>
+          </table>
+        </div>
+        {{else if .Domain.WebHost}}
+        <p class="meta">Discovered host: <code>{{.Domain.WebHost}}</code>
+          {{range .Domain.WebProbes}} · {{.Family}} {{if .OK}}ok{{else}}{{.Error}}{{end}}{{end}}
+        </p>
+        {{end}}
+        {{with checkAdvice .Advice "web"}}
+        <div class="domain-action-block">
+          <p><strong>📌 Action item(s):</strong></p>
+          <ul>{{range .}}<li>{{.Text}}</li>{{end}}</ul>
+        </div>
+        {{end}}
+      </article>
+
+      {{$dnssecL := index .LegendByID "dnssec"}}
+      <article class="domain-check-card">
+        <div class="domain-check-card__head">
+          <h3>DNSSEC</h3>
+          <span class="legend-chip cell--{{dnssecCellClass .Domain.DNSSEC}}">{{dnssecStateLabel .Domain.DNSSEC}}</span>
+        </div>
+        <p class="domain-check-display"><code>{{.Domain.DNSSEC.Display}}</code></p>
+        {{if $dnssecL.PlainMeaning}}<p><strong>Meaning:</strong> {{$dnssecL.PlainMeaning}}</p>{{end}}
+        <p class="meta">Apex DNSKEY presence only — not full chain validation.</p>
+        <p><a href="{{.DNSVizURL}}" target="_blank" rel="noopener">Analyze on DNSViz</a></p>
+        {{with checkAdvice .Advice "dnssec"}}
+        <div class="domain-action-block">
+          <p><strong>📌 Action item(s):</strong></p>
+          <ul>{{range .}}<li>{{.Text}}</li>{{end}}</ul>
+        </div>
+        {{end}}
+      </article>
+
+      {{$dmarcL := index .LegendByID "dmarc"}}
+      <article class="domain-check-card">
+        <div class="domain-check-card__head">
+          <h3>DMARC</h3>
+          <span class="col-dmarc-pct legend-chip" data-pct="{{dmarcPctAttr .Domain.DMARC}}" title="{{if eq .Domain.DMARC.State "absent"}}No _dmarc TXT{{else if eq .Domain.DMARC.State "present"}}Published policy{{else}}Lookup issue{{end}}">{{.Domain.DMARC.Display}}</span>
+        </div>
+        {{if eq .Domain.DMARC.State "absent"}}
+        <p class="domain-check-display"><code>No record</code> — no TXT at <code>_dmarc.{{.Domain.Domain}}</code>.</p>
+        {{else if eq .Domain.DMARC.State "present"}}
+        <p class="domain-check-display"><code>{{.Domain.DMARC.Display}}</code> — published organizational policy.{{if eq .Domain.DMARC.Policy "none"}} Monitoring only (receivers should not reject mail); tighten toward quarantine, then reject when ready. Not the same as missing DMARC.{{else if eq .Domain.DMARC.Policy "quarantine"}} Ask receivers to quarantine failing mail; reject is stronger.{{else if eq .Domain.DMARC.Policy "reject"}} Strongest published policy (SPF/DKIM alignment still not measured here).{{end}}</p>
+        {{else}}
+        <p class="domain-check-display"><code>{{.Domain.DMARC.Display}}</code></p>
+        {{end}}
+        {{if $dmarcL.PlainMeaning}}<p><strong>Meaning:</strong> {{replaceAll $dmarcL.PlainMeaning "{domain}" .Domain.Domain}}</p>{{end}}
+        {{if .Domain.DMARC.Record}}
+        <p class="meta">Record at <code>_dmarc.{{.Domain.Domain}}</code>:</p>
+        <p class="domain-check-display"><code class="domain-dmarc-record">{{.Domain.DMARC.Record}}</code></p>
+        {{else if eq .Domain.DMARC.State "absent"}}
+        <p class="meta">Publish a DMARC TXT at <code>_dmarc.{{.Domain.Domain}}</code> (often start with <code>p=none</code>, then tighten).</p>
+        {{end}}
+        <p class="meta">Policy publication only — SPF/DKIM not measured. Not part of the 0–4 row score.</p>
+        <p><a href="{{.DMARCInspector}}" target="_blank" rel="noopener">Check on dmarcian</a></p>
+        {{with checkAdvice .Advice "dmarc"}}
+        <div class="domain-action-block">
+          <p><strong>📌 Action item(s):</strong></p>
+          <ul>{{range .}}<li>{{.Text}}</li>{{end}}</ul>
+        </div>
+        {{end}}
+      </article>
+
+    </div>
+  </main>
+
+  {{template "siteFooter" .}}
+  {{template "connStatusDialog" .}}
+
+  <script src="/static/js/pct-color-ramp.js"></script>
+  <script src="/static/js/country-table-ramp.js"></script>
+  <script nonce="{{.Nonce}}">
+    window.__PROBE_V4__ = {{if .ProbeV4}}"{{.ProbeV4}}"{{else}}""{{end}};
+    window.__PROBE_V6__ = {{if .ProbeV6}}"{{.ProbeV6}}"{{else}}""{{end}};
+    window.__PROBE_DS__ = {{if .ProbeDS}}"{{.ProbeDS}}"{{else}}""{{end}};
+  </script>
+  <script src="/static/js/conn-status-probe.js"></script>
+  <script src="/static/js/conn-status-ui.js"></script>
+  <script src="/static/js/border.js"></script>
+  <script src="/static/js/cookie-consent.js" defer></script>
+</body>
+</html>

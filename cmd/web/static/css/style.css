@@ -870,6 +870,138 @@ body:has(#cookie-banner-root:not([hidden])) {
   padding-bottom: 6rem;
 }
 
+/* Domain detail page */
+.domain-detail {
+  margin: 0 1.25rem 2rem;
+}
+.domain-detail .summary-strip {
+  margin-left: 0;
+  margin-right: 0;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+}
+.stat-value--meta {
+  font-size: 0.95rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.domain-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0.5rem;
+}
+.domain-action {
+  display: inline-block;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: inherit;
+  text-decoration: none;
+}
+.domain-action:hover {
+  background: #f8fafc;
+}
+.domain-disclaimer {
+  margin: 0.35rem 0 1rem;
+}
+.domain-priority {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+}
+.domain-priority h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+}
+.domain-priority ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+.domain-check-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+@media (max-width: 720px) {
+  .domain-check-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.domain-check-card {
+  background: #fff;
+  border: 1px solid #ececec;
+  border-radius: 6px;
+  padding: 0.75rem 0.85rem;
+}
+.domain-check-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+.domain-check-card__head h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.domain-check-display {
+  margin: 0 0 0.45rem;
+}
+.domain-check-display code {
+  font-size: 0.85rem;
+  background: #fafafa;
+  padding: 0.2rem 0.35rem;
+  border-radius: 4px;
+}
+.domain-action-block {
+  margin: 0.55rem 0 0;
+}
+.domain-action-block p {
+  margin: 0 0 0.25rem;
+}
+.domain-action-block ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: inherit;
+}
+.domain-check-card > ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+.domain-host-wrap {
+  margin: 0.5rem 0;
+  overflow-x: auto;
+}
+.domain-host-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+.domain-host-table th,
+.domain-host-table td {
+  border: 1px solid #e8e8e8;
+  padding: 0.3rem 0.4rem;
+  text-align: left;
+  vertical-align: top;
+}
+.domain-host-table .mono {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  word-break: break-all;
+}
+.domain-dmarc-record {
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }

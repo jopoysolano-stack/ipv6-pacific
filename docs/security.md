@@ -6,14 +6,15 @@ Cross-check ideas against [`bookerpal/docs/security.md`](/Users/franck/code/book
 
 ## Threat model
 
-- **Untrusted HTTP input**: path segments (`/country/{iso2}`), optional query strings. No user-generated HTML stored.
+- **Untrusted HTTP input**: path segments (`/country/{iso2}`, `/domain/{name}`), optional query strings. No user-generated HTML stored. Domain names are charset-validated and looked up only inside allowlisted economy JSON files (never used as filesystem paths).
 - **Untrusted data**: JSON artifacts under `data/` are written only by the collector; integrity depends on host security.
+- **Public measurement detail**: domain pages may show NS/MX/web hostnames, observed A/AAAA addresses, and **tokenized** probe outcomes (`timeout`, `refused`, …) — public DNS observations, not credentials. Raw Go/network error strings are not stored in those fields.
 - **Outbound**: collector fetches **APNIC Labs** JSON from **`data1.labs.apnic.net`**, scrapes per-ASN stats from **`stats.labs.apnic.net`**, **Hurricane Electric** from **`bgp.he.net`**, and **RIPEstat** from **`stat.ripe.net`** (RPKI sampling) — each over HTTPS with hostname allowlists in the respective clients. DMARC uses public DNS (resolver in `internal/checks`).
 
 ## Controls implemented
 
 - **CSP and security headers** via `internal/httpserver` (see `cmd/web/main.go`): `Content-Security-Policy`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`; **HSTS** when TLS is enabled on the listener.
-- **ISO2 allowlist** for `/country/` and `/api/countries/` from the active region’s `config/{REGION}_iso2.yaml` (via `config/regions.yaml`).
+- **ISO2 allowlist** for `/country/` and `/api/countries/` from the active region’s `config/{REGION}_iso2.yaml` (via `config/regions.yaml`). Domain pages scan only those allowlisted country files.
 - **Rate limiting** on `/api/*` (excluding `/api/healthz`).
 - **HTML templates** use `html/template` auto-escaping for dynamic text.
 - **APNIC clients**: hostname allowlists in `internal/apniclabs` (`data1.labs.apnic.net`) and `internal/apnicstats` (`stats.labs.apnic.net`).

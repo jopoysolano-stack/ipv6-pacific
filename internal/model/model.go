@@ -3,7 +3,7 @@ package model
 import "time"
 
 // CollectorVersion is embedded in generated JSON for traceability.
-const CollectorVersion = "0.3.0"
+const CollectorVersion = "0.4.0"
 
 // DeployClass matches UI color semantics (orange / blue / green).
 type DeployClass string
@@ -58,11 +58,11 @@ type CountryFile struct {
 
 // BGPHETable is a merged snapshot: HE country BGP listing plus APNIC Labs per-ASN IPv6 preference.
 type BGPHETable struct {
-	SourceURL            string            `json:"source_url"`
-	FetchedAt            time.Time         `json:"fetched_at"`
-	APNICStatsSourceURL  string            `json:"apnic_stats_source_url,omitempty"`
-	APNICStatsFetchedAt  time.Time         `json:"apnic_stats_fetched_at,omitempty"`
-	Networks             []BGPHENetworkRow `json:"networks"`
+	SourceURL           string            `json:"source_url"`
+	FetchedAt           time.Time         `json:"fetched_at"`
+	APNICStatsSourceURL string            `json:"apnic_stats_source_url,omitempty"`
+	APNICStatsFetchedAt time.Time         `json:"apnic_stats_fetched_at,omitempty"`
+	Networks            []BGPHENetworkRow `json:"networks"`
 }
 
 // BGPHENetworkRow is one ASN in the merged BGP / APNIC table.
@@ -89,17 +89,39 @@ type BGPHENetworkRow struct {
 
 // DomainResult is one row in the Afrinic-style table.
 type DomainResult struct {
-	Domain       string        `json:"domain"`
-	Organization string        `json:"organization,omitempty"`
-	Sector       string        `json:"sector,omitempty"`
-	DNS          ServiceColumn `json:"dns"`
-	Mail         ServiceColumn `json:"mail"`
-	Web          ServiceColumn `json:"web"`
-	DNSSEC       DNSSECColumn  `json:"dnssec"`
-	DMARC        DMARCColumn   `json:"dmarc"`
-	RollupClass  DeployClass   `json:"rollup_class"`
-	Error        string        `json:"error,omitempty"`
-	CollectedAt  time.Time     `json:"collected_at,omitempty"` // UTC when this row's checks finished
+	Domain       string          `json:"domain"`
+	Organization string          `json:"organization,omitempty"`
+	Sector       string          `json:"sector,omitempty"`
+	DNS          ServiceColumn   `json:"dns"`
+	Mail         ServiceColumn   `json:"mail"`
+	Web          ServiceColumn   `json:"web"`
+	DNSSEC       DNSSECColumn    `json:"dnssec"`
+	DMARC        DMARCColumn     `json:"dmarc"`
+	DNSHosts     []ServiceHost   `json:"dns_hosts,omitempty"`  // collector ≥0.4
+	MailHosts    []ServiceHost   `json:"mail_hosts,omitempty"` // collector ≥0.4
+	WebHosts     []ServiceHost   `json:"web_hosts,omitempty"`  // collector ≥0.4 discovered HTTPS host + A/AAAA
+	WebHost      string          `json:"web_host,omitempty"`   // collector ≥0.4; same as WebHosts[0].Host when set
+	WebProbes    []ProbeEndpoint `json:"web_probes,omitempty"` // collector ≥0.4 family-level HTTPS probes
+	RollupClass  DeployClass     `json:"rollup_class"`
+	Error        string          `json:"error,omitempty"`
+	CollectedAt  time.Time       `json:"collected_at,omitempty"` // UTC when this row's checks finished
+}
+
+// ProbeEndpoint is one IP (or family-level) probe outcome with a stable error token.
+type ProbeEndpoint struct {
+	IP     string `json:"ip,omitempty"` // empty for family-level web probes
+	Family string `json:"family"`       // "ipv4" | "ipv6"
+	OK     bool   `json:"ok"`
+	Error  string `json:"error,omitempty"` // timeout, refused, no_banner, http_5xx, dns_error, …
+}
+
+// ServiceHost is one NS or MX hostname with resolved addresses and per-IP probes.
+type ServiceHost struct {
+	Host     string          `json:"host"`
+	Location string          `json:"location,omitempty"` // I, P, O
+	IPv4     []string        `json:"ipv4,omitempty"`
+	IPv6     []string        `json:"ipv6,omitempty"`
+	Probes   []ProbeEndpoint `json:"probes,omitempty"`
 }
 
 // ServiceMetrics holds NIST-style counts per address family.
@@ -134,6 +156,7 @@ type DMARCColumn struct {
 	SubdomainPolicy string  `json:"subdomain_policy,omitempty"` // effective sp after inherit
 	RawP            string  `json:"raw_p,omitempty"`
 	RawSP           string  `json:"raw_sp,omitempty"`
+	Record          string  `json:"record,omitempty"` // first v=DMARC1 TXT value when present
 	Display         string  `json:"display"`
 	ScorePct        float64 `json:"score_pct,omitempty"` // 0-100 for UI ramp; absent=0, error=omit
 }

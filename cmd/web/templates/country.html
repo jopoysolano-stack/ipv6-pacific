@@ -164,14 +164,14 @@
         <tbody>
           {{range .Country.Domains}}
           <tr>
-            <td><a href="https://{{.Domain}}/" rel="noopener noreferrer">{{.Domain}}</a></td>
+            <td><a href="/domain/{{.Domain}}">{{.Domain}}</a></td>
             <td>{{.Organization}}</td>
             <td>{{.Sector}}</td>
             <td class="results__score">{{rowScore .}}</td>
             <td class="cell cell--{{.DNS.Class}}">{{.DNS.Display}}</td>
             <td class="cell cell--{{.Mail.Class}}">{{.Mail.Display}}</td>
             <td class="cell cell--{{.Web.Class}}">{{.Web.Display}}</td>
-            <td class="cell cell--{{dnssecCellClass .DNSSEC}}">{{.DNSSEC.Display}}</td>
+            <td class="cell cell--{{dnssecCellClass .DNSSEC}}"><a href="{{dnsvizURL .Domain}}" target="_blank" rel="noopener" title="Analyze DNSSEC on DNSViz">{{.DNSSEC.Display}}</a></td>
             <td class="col-dmarc-pct" data-pct="{{dmarcPctAttr .DMARC}}" data-sort-value="{{if eq .DMARC.State "error"}}-1{{else}}{{printf "%.6f" .DMARC.ScorePct}}{{end}}"><a href="{{dmarcInspectorURL .Domain}}" target="_blank" rel="noopener" title="Check DMARC on dmarcian">{{.DMARC.Display}}</a></td>
           </tr>
           {{end}}

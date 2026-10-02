@@ -14,8 +14,9 @@ import (
 	"github.com/pacific-monitor/pacific-monitor/internal/model"
 )
 
-func checkWeb(ctx context.Context, apex string, cfg Config, preferredWebURL string) (model.ServiceColumn, string, error) {
+func checkWeb(ctx context.Context, apex string, cfg Config, preferredWebURL string) (model.ServiceColumn, model.ServiceHost, error) {
 	col := model.ServiceColumn{Location: "-", Display: "[0] -/-/- [-]"}
+	var host model.ServiceHost
 
 	finalHost, baseURL, err := discoverWeb(ctx, apex, cfg.HTTPTimeout, preferredWebURL)
 	if err != nil || finalHost == "" {
@@ -23,17 +24,19 @@ func checkWeb(ctx context.Context, apex string, cfg Config, preferredWebURL stri
 			col.Display = fmt.Sprintf("[0] error: %v", err)
 		}
 		col.Class = model.DeployUnknown
-		return col, "", err
+		return col, host, err
 	}
 
 	col.Location = classifyLocation(finalHost, apex)
+	host.Host = finalHost
+	host.Location = col.Location
 
 	resolver := net.Resolver{PreferGo: true}
 	addrs, err := resolver.LookupIPAddr(ctx, finalHost)
 	if err != nil {
 		col.Display = fmt.Sprintf("[?] %v", err)
 		col.Class = model.DeployUnknown
-		return col, finalHost, err
+		return col, host, err
 	}
 
 	var v4s, v6s []net.IP
@@ -46,24 +49,38 @@ func checkWeb(ctx context.Context, apex string, cfg Config, preferredWebURL stri
 	}
 	v4s = uniqueIPs(v4s)
 	v6s = uniqueIPs(v6s)
+	for _, ip := range v4s {
+		host.IPv4 = append(host.IPv4, ip.String())
+	}
+	for _, ip := range v6s {
+		host.IPv6 = append(host.IPv6, ip.String())
+	}
 
 	v4cfg := len(v4s)
 	v6cfg := len(v6s)
 
 	v4op := 0
-	if v4cfg > 0 && httpHeadFamily(ctx, baseURL, cfg.HTTPTimeout, "tcp4") {
-		v4op = v4cfg
+	if v4cfg > 0 {
+		ok, reason := httpHeadFamily(ctx, baseURL, cfg.HTTPTimeout, "tcp4")
+		host.Probes = append(host.Probes, model.ProbeEndpoint{Family: "ipv4", OK: ok, Error: reason})
+		if ok {
+			v4op = v4cfg
+		}
 	}
 	v6op := 0
-	if v6cfg > 0 && httpHeadFamily(ctx, baseURL, cfg.HTTPTimeout, "tcp6") {
-		v6op = v6cfg
+	if v6cfg > 0 {
+		ok, reason := httpHeadFamily(ctx, baseURL, cfg.HTTPTimeout, "tcp6")
+		host.Probes = append(host.Probes, model.ProbeEndpoint{Family: "ipv6", OK: ok, Error: reason})
+		if ok {
+			v6op = v6cfg
+		}
 	}
 
 	col.IPv4 = model.ServiceMetrics{Configured: v4cfg, Reachable: v4cfg, Operational: v4op}
 	col.IPv6 = model.ServiceMetrics{Configured: v6cfg, Reachable: v6cfg, Operational: v6op}
 	col.Display = fmt.Sprintf("[%d] %d/%d/%d [%s]", 1, v6cfg, v6cfg, v6op, col.Location)
 	col.Class = classifyService(col.IPv4, col.IPv6)
-	return col, finalHost, nil
+	return col, host, nil
 }
 
 // webDiscoverCandidates builds GET URLs: optional yaml web_url first, then apex and www.apex.
@@ -150,7 +167,7 @@ func discoverWeb(ctx context.Context, apex string, timeout time.Duration, prefer
 	return "", "", lastErr
 }
 
-func httpHeadFamily(ctx context.Context, rawURL string, timeout time.Duration, tcpNetwork string) bool {
+func httpHeadFamily(ctx context.Context, rawURL string, timeout time.Duration, tcpNetwork string) (bool, string) {
 	ctx2, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	tr := &http.Transport{
@@ -172,15 +189,18 @@ func httpHeadFamily(ctx context.Context, rawURL string, timeout time.Duration, t
 	}}
 	req, err := http.NewRequestWithContext(ctx2, http.MethodGet, rawURL, nil)
 	if err != nil {
-		return false
+		return false, ProbeOther
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return false
+		return false, classifyNetError(err)
 	}
 	_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 64*1024))
 	resp.Body.Close()
-	return resp.StatusCode < 500
+	if resp.StatusCode >= 500 {
+		return false, ProbeHTTP5xx
+	}
+	return true, ""
 }
 
 func webLegendExplanation() LegendCheckExplanation {

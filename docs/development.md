@@ -91,7 +91,7 @@ Rasterization is pure Go (**oksvg** + **rasterx**).
 
 ### Sitemap (Google / Bing)
 
-**`GET /sitemap.xml`** returns a [sitemaps.org](https://www.sitemaps.org/protocol.html) **urlset** for indexable HTML pages: home (`/`), about (`/about`), and one URL per economy in the **active region** `config/{REGION}_iso2.yaml` as `/country/{ISO2}`. `lastmod` for `/` comes from `data/{region}/index.json`’s `generated_at`; for country pages it uses the on-disk mtime of `data/{region}/countries/{ISO2}.json` when that file exists.
+**`GET /sitemap.xml`** returns a [sitemaps.org](https://www.sitemaps.org/protocol.html) **urlset** for indexable HTML pages: home (`/`), about (`/about`), embed (`/embed`), one URL per economy in the **active region** `config/{REGION}_iso2.yaml` as `/country/{ISO2}`, and one URL per monitored domain present in on-disk country JSON as `/domain/{name}` (e.g. `/domain/ag.gov.fj`). `lastmod` for `/` comes from `data/{region}/index.json`’s `generated_at`; for country and domain pages it uses the on-disk mtime of `data/{region}/countries/{ISO2}.json` when that file exists.
 
 Implementation: **`serveSitemap`** in [`cmd/web/sitemap.go`](../cmd/web/sitemap.go), registered in [`cmd/web/main.go`](../cmd/web/main.go). **`GET /robots.txt`** serves the embedded rules from `cmd/web/static/robots.txt` and appends a fully qualified **`Sitemap:`** line built with the same origin logic as canonical URLs (`siteurl`), so crawlers discover `/sitemap.xml` without hard-coding the public hostname.
 
@@ -203,7 +203,7 @@ The outage page inlines the connection-status widget (`partials/conn-status.html
 
 **Embed exemptions** (third-party widgets keep working on IPv4 during the drill): `/embed/conn-status`, `/embed/conn-status/details`, `/embed/conn-status.js`, `/static/css/conn-status-embed.css`, and **`/api/healthz`** on the main host (dual-stack **`PROBE_DS_URL`**). The iframe document inlines CSS/JS (no `/static/js` follow-ups). **`/embed`** (instructions page) is not exempt. The **IPv4-unavailable HTML page** includes an inlined connection-status button. See **[embed.md](embed.md)**.
 
-**Advance notice:** the **7 calendar days** before each UTC day **6** show an optional banner on all main HTML pages (home, about, country, embed). Permanent copy: `/about#ipv6-day-drill`.
+**Advance notice:** the **7 calendar days** before each UTC day **6** show an optional banner on all main HTML pages (home, about, country, domain, embed). Permanent copy: `/about#ipv6-day-drill`.
 
 **Local test** (with **`IPV4_OUTAGE_FORCE=1`** in `.env.local`):
 
@@ -247,10 +247,13 @@ The **IPv4-unavailable page** sends `Retry-Over-IPv6-Recovery` when the IPv6 pro
 
 **Production rollout:** deploy binaries, set per-region **`.env.%i`** / **`PUBLIC_SITE_URL`**, confirm **`IPV4_OUTAGE_FORCE`** is unset and **`IPV4_OUTAGE_SKIP`** is unset (or `0`) for both Pacific and Caribbean, restart **`ipv6-web@*`** / **`ipv6-collector@*`**. Use **`IPV4_OUTAGE_SKIP=1`** only as an emergency rollback.
 
-## DMARC and RPKI (collector v0.3+)
+## DMARC, RPKI, and domain detail (collector v0.4+)
 
-- **DMARC**: `_dmarc.{apex}` TXT per domain in `internal/checks/dmarc.go`; stored on `DomainResult.dmarc`; country table column uses 0–100% ramp (`internal/rampscore`).
+- **DMARC**: `_dmarc.{apex}` TXT per domain in `internal/checks/dmarc.go`; stored on `DomainResult.dmarc` (policy fields plus full `record` TXT when present); country table column uses 0–100% ramp (`internal/rampscore`). Country and domain pages link to dmarcian for policy inspection. Domain pages show the looked-up name (`_dmarc.{domain}`) and the raw TXT when available.
 - **RPKI**: RIPEstat `announced-prefixes` + `rpki-validation` per ASN after HE/APNIC merge (`internal/collector/rpki.go`); sampled prefix cap via `COLLECTOR_RPKI_MAX_PREFIXES_PER_ASN`. Row score / economy deployment score **unchanged** in v1.
+- **Domain detail pages**: `GET /domain/{name}` (e.g. `/domain/ag.gov.fj`) shows per-check meaning, host/IP lists, probe outcomes, and improvement guidance. Country table domain cells link here (website link lives on the detail page). DNSSEC cells link to [DNSViz](https://dnsviz.net/) for chain analysis.
+- **Unknown domain requests**: valid hostname-shaped `/domain/{name}` misses log a journal line `domain_miss {"event":"domain_miss","domain":"…",…}` (at most once per domain per minute) so operators can see candidates for `config/domains`. Example tally: `journalctl -u ipv6-web@pacific --since today | grep 'domain_miss {' | sed 's/.*domain_miss //' | jq -r .domain | sort | uniq -c | sort -rn`.
+- **Collector v0.4 host detail**: optional `dns_hosts`, `mail_hosts`, `web_hosts` (plus legacy `web_host` / `web_probes`) on each `DomainResult` — NS/MX/web hostnames, A/AAAA, and probe tokens (`timeout` / `refused`, …). Web HTTPS probes remain family-level (not per-IP), but resolved addresses are stored. Older JSON without these fields still renders aggregates only. Compact table `Display` / `Class` / scoring are unchanged.
 - **Ops**: email **stat@ripe.net** to register `RIPESTAT_SOURCEAPP` before large `run-once` bursts.
 
 ## Adding a new test column (contract)
